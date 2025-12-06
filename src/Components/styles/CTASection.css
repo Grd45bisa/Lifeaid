@@ -1,0 +1,518 @@
+/* ===================================
+   CTA SECTION
+   =================================== */
+
+.cta-section {
+  background-color: #224570;
+  padding: 5rem 1.5rem;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Optional: Add pattern overlay */
+.cta-section::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: 
+    radial-gradient(circle at 20% 50%, rgba(255, 255, 255, 0.03) 0%, transparent 50%),
+    radial-gradient(circle at 80% 80%, rgba(255, 255, 255, 0.03) 0%, transparent 50%);
+  pointer-events: none;
+}
+
+.cta-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  width: 100%;
+  position: relative;
+  z-index: 1;
+}
+
+.cta-content {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4rem;
+  align-items: center;
+}
+
+/* ===================================
+   LEFT SIDE - TEXT CONTENT
+   =================================== */
+
+.cta-text {
+  color: #ffffff;
+}
+
+.cta-title {
+  font-size: clamp(1.75rem, 4vw, 2.5rem);
+  font-weight: 700;
+  color: #ffffff;
+  line-height: 1.3;
+  margin: 0 0 1.5rem 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+.cta-description {
+  font-size: clamp(0.9375rem, 2vw, 1.0625rem);
+  color: rgba(255, 255, 255, 0.9);
+  line-height: 1.7;
+  margin: 0 0 2rem 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+/* CTA Buttons */
+.cta-buttons {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.cta-btn {
+  padding: 0.875rem 2rem;
+  font-size: clamp(0.9375rem, 2vw, 1rem);
+  font-weight: 600;
+  border-radius: 8px;
+  border: 2px solid transparent;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  white-space: nowrap;
+}
+
+.cta-btn-primary {
+  background-color: #ffffff;
+  color: #224570;
+  border-color: #ffffff;
+}
+
+.cta-btn-primary:hover {
+  background-color: transparent;
+  color: #ffffff;
+  border-color: #ffffff;
+}
+
+.cta-btn-secondary {
+  background-color: transparent;
+  color: #ffffff;
+  border-color: rgba(255, 255, 255, 0.5);
+}
+
+.cta-btn-secondary:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  border-color: #ffffff;
+}
+
+/* ===================================
+   RIGHT SIDE - FORM
+   =================================== */
+
+.cta-form-wrapper {
+  width: 100%;
+}
+
+.cta-form-card {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 16px;
+  padding: 2rem;
+}
+
+.form-title {
+  font-size: clamp(1.25rem, 3vw, 1.5rem);
+  font-weight: 700;
+  color: #ffffff;
+  margin: 0 0 1.5rem 0;
+  text-align: center;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+.cta-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+/* Form Groups */
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.form-label {
+  font-size: clamp(0.875rem, 2vw, 0.9375rem);
+  font-weight: 500;
+  color: #ffffff;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+.required {
+  color: #fca5a5;
+}
+
+/* Form Inputs */
+.form-input,
+.form-textarea {
+  width: 100%;
+  padding: 0.875rem 1rem;
+  font-size: clamp(0.875rem, 2vw, 1rem);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 8px;
+  background-color: rgba(255, 255, 255, 0.95);
+  color: #1e293b;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  transition: all 0.3s ease;
+}
+
+.form-input::placeholder,
+.form-textarea::placeholder {
+  color: #94a3b8;
+}
+
+.form-input:focus,
+.form-textarea:focus {
+  outline: none;
+  border-color: #ffffff;
+  background-color: #ffffff;
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.2);
+}
+
+.form-textarea {
+  resize: vertical;
+  min-height: 100px;
+}
+
+/* Submit Button */
+.form-submit {
+  width: 100%;
+  padding: 1rem;
+  font-size: clamp(0.9375rem, 2vw, 1rem);
+  font-weight: 600;
+  color: #224570;
+  background-color: #ffffff;
+  border: 2px solid #ffffff;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  margin-top: 0.5rem;
+}
+
+.form-submit:hover:not(:disabled) {
+  background-color: transparent;
+  color: #ffffff;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.form-submit:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.form-submit.submitting {
+  background-color: rgba(255, 255, 255, 0.8);
+}
+
+/* Form Messages */
+.form-message {
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  font-size: clamp(0.875rem, 2vw, 0.9375rem);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  text-align: center;
+  animation: slideDown 0.3s ease;
+}
+
+.form-message.success {
+  background-color: rgba(16, 185, 129, 0.2);
+  border: 1px solid rgba(16, 185, 129, 0.4);
+  color: #ffffff;
+}
+
+.form-message.error {
+  background-color: rgba(239, 68, 68, 0.2);
+  border: 1px solid rgba(239, 68, 68, 0.4);
+  color: #ffffff;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ===================================
+   RESPONSIVE DESIGN
+   =================================== */
+
+/* Desktop Large (1024px - 1199px) */
+@media (min-width: 1024px) and (max-width: 1199px) {
+  .cta-section {
+    padding: 4rem 1.25rem;
+  }
+
+  .cta-content {
+    gap: 3rem;
+  }
+
+  .cta-form-card {
+    padding: 1.75rem;
+  }
+}
+
+/* Tablet Landscape (768px - 1023px) */
+@media (min-width: 768px) and (max-width: 1023px) {
+  .cta-section {
+    padding: 4rem 1rem;
+  }
+
+  .cta-content {
+    grid-template-columns: 1fr;
+    gap: 3rem;
+  }
+
+  .cta-text {
+    text-align: center;
+  }
+
+  .cta-buttons {
+    justify-content: center;
+  }
+
+  .cta-form-card {
+    max-width: 600px;
+    margin: 0 auto;
+  }
+}
+
+/* Tablet Portrait (600px - 767px) */
+@media (min-width: 600px) and (max-width: 767px) {
+  .cta-section {
+    padding: 3rem 1rem;
+  }
+
+  .cta-content {
+    grid-template-columns: 1fr;
+    gap: 2.5rem;
+  }
+
+  .cta-text {
+    text-align: center;
+  }
+
+  .cta-description {
+    margin-bottom: 1.5rem;
+  }
+
+  .cta-buttons {
+    justify-content: center;
+  }
+
+  .cta-form-card {
+    max-width: 500px;
+    margin: 0 auto;
+    padding: 1.5rem;
+  }
+
+  .cta-form {
+    gap: 1rem;
+  }
+}
+
+/* Mobile Large (480px - 599px) */
+@media (min-width: 480px) and (max-width: 599px) {
+  .cta-section {
+    padding: 3rem 0.875rem;
+  }
+
+  .cta-content {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+  }
+
+  .cta-text {
+    text-align: center;
+  }
+
+  .cta-description {
+    margin-bottom: 1.25rem;
+  }
+
+  .cta-buttons {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .cta-btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .cta-form-card {
+    padding: 1.5rem;
+  }
+
+  .cta-form {
+    gap: 1rem;
+  }
+}
+
+/* Mobile Medium (375px - 479px) */
+@media (min-width: 375px) and (max-width: 479px) {
+  .cta-section {
+    padding: 2.5rem 0.75rem;
+  }
+
+  .cta-content {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+  }
+
+  .cta-text {
+    text-align: center;
+  }
+
+  .cta-description {
+    margin-bottom: 1.25rem;
+  }
+
+  .cta-buttons {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .cta-btn {
+    width: 100%;
+    padding: 0.75rem 1.5rem;
+  }
+
+  .cta-form-card {
+    padding: 1.25rem;
+  }
+
+  .cta-form {
+    gap: 1rem;
+  }
+
+  .form-input,
+  .form-textarea {
+    padding: 0.75rem 0.875rem;
+  }
+}
+
+/* Mobile Small (< 375px) */
+@media (max-width: 374px) {
+  .cta-section {
+    padding: 2rem 0.625rem;
+  }
+
+  .cta-content {
+    grid-template-columns: 1fr;
+    gap: 1.75rem;
+  }
+
+  .cta-text {
+    text-align: center;
+  }
+
+  .cta-description {
+    margin-bottom: 1rem;
+  }
+
+  .cta-buttons {
+    flex-direction: column;
+    gap: 0.625rem;
+  }
+
+  .cta-btn {
+    width: 100%;
+    padding: 0.75rem 1.25rem;
+  }
+
+  .cta-form-card {
+    padding: 1.25rem;
+  }
+
+  .cta-form {
+    gap: 0.875rem;
+  }
+
+  .form-input,
+  .form-textarea {
+    padding: 0.75rem;
+  }
+
+  .form-submit {
+    padding: 0.875rem;
+  }
+}
+
+/* ===================================
+   ACCESSIBILITY
+   =================================== */
+
+@media (prefers-reduced-motion: reduce) {
+  .cta-btn,
+  .form-input,
+  .form-textarea,
+  .form-submit {
+    transition: none;
+  }
+
+  .form-message {
+    animation: none;
+  }
+}
+
+@media (prefers-contrast: high) {
+  .cta-section {
+    background: #224570;
+  }
+
+  .form-input,
+  .form-textarea {
+    border-color: #ffffff;
+  }
+
+  .cta-btn-primary {
+    background-color: #ffffff;
+    color: #000000;
+  }
+}
+
+/* Focus Styles */
+.cta-btn:focus-visible,
+.form-input:focus-visible,
+.form-textarea:focus-visible,
+.form-submit:focus-visible {
+  outline: 2px solid #ffffff;
+  outline-offset: 2px;
+}
+
+/* Print Styles */
+@media print {
+  .cta-section {
+    background: white;
+    color: black;
+    padding: 1rem 0;
+  }
+
+  .cta-form-card {
+    background: white;
+    border: 1px solid #000;
+  }
+
+  .form-submit {
+    display: none;
+  }
+}

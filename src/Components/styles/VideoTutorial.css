@@ -1,0 +1,325 @@
+/* ===================================
+  VIDEO TUTORIAL SECTION
+  =================================== */
+
+.video-tutorial-section {
+  position: relative;
+  padding: 4rem 0;
+  overflow: hidden;
+  background: #224570;
+}
+
+.video-tutorial-container {
+  position: relative;
+  z-index: 10;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+
+/* Badge */
+.video-badge-wrapper {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 1.5rem;
+}
+
+.video-badge {
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 2px;
+  color: rgba(255, 255, 255, 0.7);
+  margin: 0 0 0.875rem 0;
+  text-transform: uppercase;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+.video-badge-icon {
+  width: 1rem;
+  height: 1rem;
+  fill: currentColor;
+}
+
+/* Title */
+.video-title {
+  font-size: 2.25rem;
+  font-weight: 700;
+  color: #ffffff;
+  text-align: center;
+  margin-bottom: 1.5rem;
+  line-height: 1.2;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+/* Description */
+.video-description {
+  font-size: 0.95rem;
+  color: #ffffff;
+  text-align: center;
+  max-width: 64rem;
+  margin: 0 auto 3rem;
+  line-height: 1.75;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+/* Video Container */
+.video-wrapper {
+  position: relative;
+  max-width: 64rem;
+  margin: 0 auto 2.5rem;
+}
+
+.video-aspect-ratio {
+  position: relative;
+  border-radius: 1rem;
+  overflow: hidden;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+  padding-bottom: 56.25%;
+}
+
+.video-element {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Play Button Overlay */
+.video-play-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: rgba(0, 0, 0, 0.3);
+  cursor: pointer;
+}
+
+.video-play-button {
+  position: relative;
+  width: 5rem;
+  height: 5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background-color: #ffffff;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4);
+  border: none;
+  cursor: pointer;
+  transition: transform 0.3s ease;
+}
+
+.video-play-button:hover {
+  transform: scale(1.1);
+}
+
+.video-play-icon {
+  width: 2rem;
+  height: 2rem;
+  color: #224570;
+  margin-left: 0.25rem;
+}
+
+/* CTA Buttons */
+.video-cta-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  justify-content: center;
+  align-items: center;
+}
+
+.video-cta-primary {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1rem 2rem;
+  background-color: #ffffff;
+  color: #224570;
+  border-radius: 0.75rem;
+  font-size: 1.125rem;
+  font-weight: 700;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.video-cta-primary:hover {
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
+  transform: translateY(-4px);
+}
+
+.video-cta-secondary {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1rem 2rem;
+  background-color: transparent;
+  color: #ffffff;
+  border: 2px solid #ffffff;
+  border-radius: 0.75rem;
+  font-size: 1.125rem;
+  font-weight: 700;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.video-cta-secondary:hover {
+  background-color: #ffffff;
+  color: #224570;
+  transform: translateY(-4px);
+}
+
+.video-cta-icon {
+  width: 1.25rem;
+  height: 1.25rem;
+}
+
+
+
+/* ===================================
+  RESPONSIVE DESIGN
+  =================================== */
+
+@media (min-width: 640px) {
+  .video-cta-wrapper {
+   flex-direction: row;
+  }
+
+  .video-tutorial-container {
+   padding: 0 1.5rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .video-tutorial-container {
+   padding: 0 2rem;
+  }
+
+  .video-title {
+   font-size: 2.25rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .video-tutorial-section {
+   padding: 3.5rem 0;
+  }
+
+  .video-title {
+   font-size: 2.25rem;
+  }
+
+  .video-description {
+   font-size: 0.95rem;
+   margin-bottom: 2.5rem;
+  }
+
+  .video-wrapper {
+   margin-bottom: 2rem;
+  }
+
+  .video-play-button {
+   width: 4rem;
+   height: 4rem;
+  }
+
+  .video-play-icon {
+   width: 1.75rem;
+   height: 1.75rem;
+  }
+
+  .video-cta-primary,
+  .video-cta-secondary {
+   font-size: 1rem;
+   padding: 0.875rem 1.75rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .video-tutorial-section {
+   padding: 3rem 0;
+  }
+
+  .video-badge {
+   font-size: 0.75rem;
+   padding: 0.4rem 1.25rem;
+  }
+
+  .video-title {
+   font-size: 2.25rem;
+  }
+
+  .video-description {
+   font-size: 0.95rem;
+   line-height: 1.65;
+  }
+
+  .video-aspect-ratio {
+   border-radius: 0.75rem;
+  }
+
+  .video-play-button {
+   width: 3.5rem;
+   height: 3.5rem;
+  }
+
+  .video-play-icon {
+   width: 1.5rem;
+   height: 1.5rem;
+  }
+
+  .video-cta-primary,
+  .video-cta-secondary {
+   width: 100%;
+   justify-content: center;
+   font-size: 0.95rem;
+  }
+
+  .video-trust-number {
+   font-size: 2.25rem;
+  }
+
+  .video-trust-text {
+   font-size: 0.875rem;
+  }
+}
+
+/* ===================================
+  ACCESSIBILITY
+  =================================== */
+
+@media (prefers-reduced-motion: reduce) {
+  .video-play-button,
+  .video-cta-primary,
+  .video-cta-secondary,
+  .video-trust-card {
+   transition: none;
+  }
+
+  .video-play-button:hover,
+  .video-cta-primary:hover,
+  .video-cta-secondary:hover {
+   transform: none;
+  }
+}
+
+@media (prefers-contrast: high) {
+  .video-tutorial-section {
+   background: #000000;
+  }
+
+  .video-badge,
+  .video-trust-card {
+   border-color: #ffffff;
+  }
+}

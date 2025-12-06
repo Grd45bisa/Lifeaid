@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:xhtml="http://www.w3.org/1999/xhtml"
+        xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
+  
+  <!-- Homepage - Indonesian -->
+  <url>
+    <loc>https://lifeaid.co.id</loc>
+    <lastmod>2025-01-15</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>1.0</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://lifeaid.co.id/en"/>
+    <xhtml:link rel="alternate" hreflang="id" href="https://lifeaid.co.id"/>
+  </url>
+
+  <!-- Homepage - English -->
+  <url>
+    <loc>https://lifeaid.co.id/en</loc>
+    <lastmod>2025-01-15</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>1.0</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://lifeaid.co.id/en"/>
+    <xhtml:link rel="alternate" hreflang="id" href="https://lifeaid.co.id"/>
+  </url>
+
+  <!-- About Page - Indonesian -->
+  <url>
+    <loc>https://lifeaid.co.id/tentang-kami</loc>
+    <lastmod>2025-01-15</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://lifeaid.co.id/en/about"/>
+    <xhtml:link rel="alternate" hreflang="id" href="https://lifeaid.co.id/tentang-kami"/>
+  </url>
+
+  <!-- About Page - English -->
+  <url>
+    <loc>https://lifeaid.co.id/en/about</loc>
+    <lastmod>2025-01-15</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://lifeaid.co.id/en/about"/>
+    <xhtml:link rel="alternate" hreflang="id" href="https://lifeaid.co.id/tentang-kami"/>
+  </url>
+
+  <!-- Products Page - Indonesian -->
+  <url>
+    <loc>https://lifeaid.co.id/produk</loc>
+    <lastmod>2025-01-15</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://lifeaid.co.id/en/products"/>
+    <xhtml:link rel="alternate" hreflang="id" href="https://lifeaid.co.id/produk"/>
+    <image:image>
+      <image:loc>https://lifeaid.co.id/Product.webp</image:loc>
+      <image:title>LifeAid Electric Patient Lifter</image:title>
+      <image:caption>Alat Angkat Pasien Elektrik Professional</image:caption>
+    </image:image>
+  </url>
+
+  <!-- Products Page - English -->
+  <url>
+    <loc>https://lifeaid.co.id/en/products</loc>
+    <lastmod>2025-01-15</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://lifeaid.co.id/en/products"/>
+    <xhtml:link rel="alternate" hreflang="id" href="https://lifeaid.co.id/produk"/>
+  </url>
+
+  <!-- Product Detail - HY101-01A - Indonesian -->
+  <url>
+    <loc>https://lifeaid.co.id/produk/electric-patient-lifter-hy101-01a</loc>
+    <lastmod>2025-01-15</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://lifeaid.co.id/en/products/electric-patient-lifter-hy101-01a"/>
+    <xhtml:link rel="alternate" hreflang="id" href="https://lifeaid.co.id/produk/electric-patient-lifter-hy101-01a"/>
+    <image:image>
+      <image:loc>https://lifeaid.co.id/Productdetail.webp</image:loc>
+      <image:title>LifeAid HY101-01A Electric Patient Lifter</image:title>
+    </image:image>
+  </url>
+
+  <!-- Contact Page - Indonesian -->
+  <url>
+    <loc>https://lifeaid.co.id/kontak</loc>
+    <lastmod>2025-01-15</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://lifeaid.co.id/en/contact"/>
+    <xhtml:link rel="alternate" hreflang="id" href="https://lifeaid.co.id/kontak"/>
+  </url>
+
+  <!-- FAQ Page - Indonesian -->
+  <url>
+    <loc>https://lifeaid.co.id/faq</loc>
+    <lastmod>2025-01-15</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+    <xhtml:link rel="alternate" hreflang="en" href="https://lifeaid.co.id/en/faq"/>
+    <xhtml:link rel="alternate" hreflang="id" href="https://lifeaid.co.id/faq"/>
+  </url>
+
+</urlset>

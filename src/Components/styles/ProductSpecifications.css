@@ -1,0 +1,400 @@
+/* ===================================
+   PRODUCT SPECIFICATIONS SECTION
+   =================================== */
+
+.product-specifications {
+  background-color: #f8fafc;
+  padding: 4rem 0;
+}
+
+.specs-header {
+  text-align: center;
+  max-width: 800px;
+  margin: 0 auto 3.5rem;
+  padding: 0 2rem;
+}
+
+.specs-badge {
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 2px;
+  color: #94a3b8;
+  margin: 0 0 0.875rem 0;
+  text-transform: uppercase;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+.specs-title {
+  font-size: 2.25rem;
+  font-weight: 700;
+  color: #224570;
+  line-height: 1.3;
+  margin: 0 0 1.25rem 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+.specs-subtitle {
+  font-size: 0.95rem;
+  color: #3d3d3d;
+  text-align: center;
+  max-width: 64rem;
+  margin: 0 auto 3rem;
+  line-height: 1.75;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+.specs-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 2rem;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 3rem;
+  align-items: start;
+}
+
+/* Specs Image */
+.specs-image {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: sticky;
+  height: 100%;
+}
+
+.specs-image-main {
+  width: 100%;
+  max-width: 600px;
+  height: auto;
+  border-radius: 12px;
+  object-fit: cover;
+  box-shadow: 0 8px 32px rgba(34, 69, 112, 0.12);
+}
+
+/* Specs Content */
+.specs-content {
+  max-width: 500px;
+}
+
+.specs-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  margin-bottom: 2.5rem;
+}
+
+.spec-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  padding: 1.25rem;
+  background-color: #ffffff;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  transition: all 0.3s ease;
+  border-left: 3px solid transparent;
+}
+
+.spec-item:last-child {
+  grid-column: span 2;
+}
+
+.spec-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  background-color: #f1f5f9;
+  color: #224570;
+  flex-shrink: 0;
+  margin-top: 0.125rem;
+}
+
+.spec-details {
+  flex: 1;
+}
+
+.spec-label {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #64748b;
+  margin: 0 0 0.25rem 0;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+.spec-value {
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: #224570;
+  line-height: 1.5;
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+/* CTA Section */
+.specs-cta {
+  background-color: #ffffff;
+  border-radius: 12px;
+  padding: 2rem;
+  text-align: center;
+  box-shadow: 0 4px 16px rgba(34, 69, 112, 0.08);
+  border: 1px solid #e2e8f0;
+}
+
+.specs-cta-text {
+  font-size: 0.95rem;
+  color: #64748b;
+  line-height: 1.6;
+  margin: 0 0 1.5rem 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+.specs-cta-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  background-color: #25d366;
+  color: #ffffff;
+  font-size: 1rem;
+  font-weight: 600;
+  padding: 0.875rem 2rem;
+  border-radius: 8px;
+  text-decoration: none;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(37, 211, 102, 0.2);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+.specs-cta-button:hover {
+  background-color: #128c7e;
+  box-shadow: 0 6px 16px rgba(37, 211, 102, 0.3);
+  transform: translateY(-2px);
+}
+
+.specs-cta-button:active {
+  transform: scale(0.98);
+}
+
+/* ===================================
+   RESPONSIVE DESIGN
+   =================================== */
+
+@media (max-width: 1024px) {
+  .specs-container {
+    grid-template-columns: 1fr;
+    gap: 2.5rem;
+  }
+
+  .specs-image {
+    position: static;
+    order: -1;
+  }
+
+  .specs-image-main {
+    max-width: 380px;
+  }
+
+  .specs-content {
+    max-width: 100%;
+  }
+}
+
+@media (max-width: 768px) {
+  .product-specifications {
+    padding: 3.5rem 0;
+  }
+
+  .specs-header {
+    margin-bottom: 3rem;
+    padding: 0 1.5rem;
+  }
+
+  .specs-title {
+    font-size: 1.875rem;
+  }
+
+  .specs-subtitle {
+    font-size: 0.9rem;
+  }
+
+  .specs-container {
+    padding: 0 1.5rem;
+    gap: 2rem;
+  }
+
+  .specs-image-main {
+    max-width: 340px;
+  }
+
+  .spec-item {
+    padding: 1rem;
+  }
+
+  .spec-icon {
+    width: 36px;
+    height: 36px;
+  }
+
+  .spec-label {
+    font-size: 0.8rem;
+  }
+
+  .spec-value {
+    font-size: 0.9rem;
+  }
+
+  .specs-cta {
+    padding: 1.75rem;
+  }
+
+  .specs-cta-text {
+    font-size: 0.9rem;
+  }
+
+  .specs-cta-button {
+    font-size: 0.95rem;
+    padding: 0.75rem 1.75rem;
+  }
+}
+
+
+
+@media (max-width: 480px) {
+  .product-specifications {
+    padding: 3rem 0;
+  }
+
+  .specs-header {
+    padding: 0 1rem;
+    margin-bottom: 2.5rem;
+  }
+
+  .specs-badge {
+    font-size: 0.65rem;
+    letter-spacing: 1.5px;
+  }
+
+  .specs-title {
+    font-size: 1.5rem;
+  }
+
+  .specs-subtitle {
+    font-size: 0.85rem;
+    line-height: 1.65;
+  }
+
+  .specs-container {
+    padding: 0 1rem;
+    gap: 1.75rem;
+  }
+
+  .specs-image-main {
+    max-width: 100%;
+    border-radius: 10px;
+  }
+
+  .spec-item {
+    padding: 0.875rem;
+    gap: 0.75rem;
+  }
+
+  .spec-icon {
+    width: 32px;
+    height: 32px;
+  }
+
+  .spec-icon svg {
+    width: 16px;
+    height: 16px;
+  }
+
+  .spec-label {
+    font-size: 0.75rem;
+  }
+
+  .spec-value {
+    font-size: 0.85rem;
+    line-height: 1.5;
+  }
+
+  .specs-cta {
+    padding: 1.5rem;
+  }
+
+  .specs-cta-text {
+    font-size: 0.85rem;
+    margin-bottom: 1.25rem;
+  }
+
+  .specs-cta-button {
+    font-size: 0.9rem;
+    padding: 0.75rem 1.5rem;
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+/* ===================================
+   ACCESSIBILITY
+   =================================== */
+
+@media (prefers-reduced-motion: reduce) {
+  .spec-item,
+  .specs-cta-button {
+    transition: none;
+  }
+
+  .spec-item:hover {
+    transform: none;
+  }
+
+  .specs-cta-button:hover {
+    transform: none;
+  }
+
+  .specs-cta-button:active {
+    transform: none;
+  }
+}
+
+@media (prefers-contrast: high) {
+  .product-specifications {
+    background-color: #ffffff;
+  }
+
+  .specs-title {
+    color: #000000;
+  }
+
+  .specs-subtitle {
+    color: #333333;
+  }
+
+  .spec-item {
+    border: 1px solid #000000;
+  }
+
+  .spec-label {
+    color: #333333;
+  }
+
+  .spec-value {
+    color: #000000;
+  }
+
+  .specs-cta {
+    border: 2px solid #000000;
+  }
+
+  .specs-cta-text {
+    color: #333333;
+  }
+
+  .specs-cta-button {
+    background-color: #000000;
+  }
+}
