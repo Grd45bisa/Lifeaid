@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lifeaid Chat Transcript</title>
+</head>
+
+<body
+    style="margin: 0; padding: 0; background-color: #f4f6f8; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">
+    <table border="0" cellpadding="0" cellspacing="0" width="100%"
+        style="max-width: 600px; margin: 20px auto; background-color: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
+        <tr>
+            <td style="background-color: #224570; padding: 30px 40px; text-align: center;">
+                <h1 style="color: #ffffff; margin: 0; font-size: 24px; font-weight: 600;">Lifeaid Medical</h1>
+                <p style="color: rgba(255,255,255,0.9); margin: 5px 0 0 0; font-size: 14px;">Smart Assistant
+                    Notification</p>
+            </td>
+        </tr>
+        <tr>
+            <td style="padding: 40px 40px 20px 40px;">
+                <h3
+                    style="color: #333333; margin: 0 0 20px 0; font-size: 18px; border-bottom: 2px solid #f0f0f0; padding-bottom: 10px;">
+                    Visitor Details</h3>
+                <table border="0" cellpadding="0" cellspacing="0" width="100%">
+                    <tr>
+                        <td style="padding: 8px 0; color: #666666; width: 120px; font-weight: 500;">Name:</td>
+                        <td style="padding: 8px 0; color: #333333; font-weight: 600;">{{{user_name}}}</td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 8px 0; color: #666666; font-weight: 500;">Email:</td>
+                        <td style="padding: 8px 0; color: #333333; font-weight: 600;">
+                            <a href="mailto:{{{user_email}}}"
+                                style="color: #224570; text-decoration: none;">{{{user_email}}}</a>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 8px 0; color: #666666; font-weight: 500;">Phone/WA:</td>
+                        <td style="padding: 8px 0; color: #333333; font-weight: 600;">
+                            <a href="https://wa.me/{{{user_phone}}}"
+                                style="color: #333333; text-decoration: none;">{{{user_phone}}}</a>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+        <tr>
+            <td style="padding: 20px 40px 40px 40px;">
+                <h3
+                    style="color: #333333; margin: 0 0 20px 0; font-size: 18px; border-bottom: 2px solid #f0f0f0; padding-bottom: 10px;">
+                    Conversation History</h3>
+                <div
+                    style="background-color: #ffffff; border: 1px solid #eeeeee; border-radius: 6px; padding: 20px; font-size: 14px; color: #444444;">
+                    {{{chat_transcript}}}
+                </div>
+                <p style="margin-top: 20px; font-size: 13px; color: #888888; font-style: italic;">* This transcript was
+                    generated automatically by Lifeaid Smart Assistant.</p>
+            </td>
+        </tr>
+        <tr>
+            <td style="background-color: #224570; padding: 30px 40px; text-align: center;">
+                <p style="color: #ffffff; margin: 0; font-size: 14px; font-weight: 500;">Lifeaid Medical Equipment</p>
+            </td>
+        </tr>
+    </table>
+</body>
+
+</html>

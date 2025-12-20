@@ -160,6 +160,7 @@ const WhatsAppBubbleChat: React.FC = () => {
   const currentLangRef = useRef<Language>(currentLang);
 
   const warningTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const leadCaptureTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const isOpenRef = useRef(isOpen);
 
   // Keep refs updated
@@ -266,18 +267,43 @@ const WhatsAppBubbleChat: React.FC = () => {
     if (!user.email) return;
 
     // Calculate full transcript
+    // Generate HTML for Chat Bubbles
     let fullTranscript = chatHistoryRef.current
-      .map(msg => `[${msg.time}] ${msg.sender.toUpperCase()}: ${msg.text}`)
-      .join('\n\n');
+      .map(msg => {
+        const isUser = msg.sender === 'user';
+        const align = isUser ? 'right' : 'left';
+        const bgColor = isUser ? '#224570' : '#f0f2f5';
+        const textColor = isUser ? '#ffffff' : '#111b21';
+        const radius = isUser ? '8px 8px 0 8px' : '0 8px 8px 8px';
+        const senderName = isUser ? user.name || 'User' : translations[currentLang].supportName;
 
-    // Add final message if calling from end timer/button
-    fullTranscript += `\n\n[System]: Chat session ended at ${getCurrentTime()}`;
+        return `
+          <div style="width: 100%; overflow: hidden; margin-bottom: 12px; font-family: 'Segoe UI', sans-serif;">
+            <div style="float: ${align}; max-width: 80%; background-color: ${bgColor}; color: ${textColor}; padding: 12px 14px; border-radius: ${radius}; box-shadow: 0 1px 2px rgba(0,0,0,0.1);">
+              <div style="font-size: 11px; font-weight: 600; margin-bottom: 4px; opacity: 0.9;">${senderName}</div>
+              <div style="font-size: 14px; line-height: 1.5; white-space: pre-wrap;">${msg.text}</div>
+              <div style="font-size: 10px; margin-top: 6px; text-align: right; opacity: 0.8;">${msg.time}</div>
+            </div>
+            <div style="clear: both;"></div>
+          </div>
+        `;
+      })
+      .join('');
+
+    // Add final message
+    fullTranscript += `
+      <div style="width: 100%; text-align: center; margin-top: 20px; padding-top: 10px; border-top: 1px dashed #e0e0e0;">
+        <span style="background-color: #f5f5f5; padding: 4px 10px; border-radius: 12px; font-size: 11px; color: #888;">
+          System: Chat session ended at ${getCurrentTime()}
+        </span>
+      </div>
+    `;
 
     const templateParams = {
       user_name: user.name,
       user_email: user.email,
       user_phone: user.phone,
-      chat_transcript: fullTranscript, // This will be injected into {{{chat_transcript}}}
+      chat_transcript: fullTranscript, // This HTML will be injected
       to_email: 'YOUR_EMAIL_HERE'
     };
 
@@ -296,6 +322,33 @@ const WhatsAppBubbleChat: React.FC = () => {
       }
     } catch (error) {
       console.error('Failed to send chat transcript:', error);
+    }
+
+  };
+
+  const sendLeadCaptureEmail = async (data: UserData) => {
+    if (!data.email) return;
+
+    const templateParams = {
+      user_name: data.name,
+      user_email: data.email,
+      user_phone: data.phone,
+      chat_transcript: "[System]: User submitted details but did not send a message within 3 minutes (Drop-off Lead).",
+      to_email: 'YOUR_EMAIL_HERE'
+    };
+
+    try {
+      if (CONFIG.emailjs.serviceId !== 'YOUR_SERVICE_ID') {
+        await emailjs.send(
+          CONFIG.emailjs.serviceId,
+          CONFIG.emailjs.templateId,
+          templateParams,
+          CONFIG.emailjs.publicKey
+        );
+        console.log('Lead capture email sent');
+      }
+    } catch (error) {
+      console.error('Failed to send lead capture email:', error);
     }
   };
 
@@ -350,7 +403,13 @@ const WhatsAppBubbleChat: React.FC = () => {
 
       // Initialize email timer reference
       lastEmailSentTimeRef.current = Date.now();
-      // sendInitialEmail removed as per request
+
+      // Start Lead Capture Timer (3 minutes)
+      if (leadCaptureTimeoutRef.current) clearTimeout(leadCaptureTimeoutRef.current);
+      leadCaptureTimeoutRef.current = setTimeout(() => {
+        console.log('Lead capture timer triggered');
+        sendLeadCaptureEmail(userData);
+      }, 3 * 60 * 1000);
     }
   };
 
@@ -660,6 +719,12 @@ const WhatsAppBubbleChat: React.FC = () => {
       // Update last message time
       lastMessageTimeRef.current = Date.now();
       warningTimeoutRef.current = null; // Reset warning flag on user activity
+
+      // Clear lead capture timer if exists (user is active)
+      if (leadCaptureTimeoutRef.current) {
+        clearTimeout(leadCaptureTimeoutRef.current);
+        leadCaptureTimeoutRef.current = null;
+      }
 
       setMessage('');
       if (inputRef.current) {
