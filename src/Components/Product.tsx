@@ -107,6 +107,7 @@ const Product: React.FC = () => {
   const handleBuyOnWebsite = (e: React.MouseEvent<HTMLAnchorElement>) => {
     e.preventDefault();
     setShowDropdown(false);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
     navigate('/product/electric-patient-lifter');
   };
 

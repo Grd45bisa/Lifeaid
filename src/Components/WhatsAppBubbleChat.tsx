@@ -45,7 +45,12 @@ const translations = {
     startChat: 'Mulai Percakapan',
     nameRequired: 'Mohon isi nama Anda',
     emailRequired: 'Mohon isi email Anda',
-    emailInvalid: 'Format email tidak valid'
+    emailInvalid: 'Format email tidak valid',
+    endChat: 'Akhiri Chat',
+    confirmEndChat: 'Apakah Anda yakin ingin mengakhiri sesi chat? Transkrip akan dikirim ke email kami.',
+    chatEnded: 'Sesi chat telah berakhir. Transkrip telah dikirim.',
+    chatClosingWarning: 'Chat akan berakhir otomatis dalam 2 menit karena tidak ada aktivitas.',
+    typeMessage: 'Ketik pesan...'
   },
   en: {
     supportName: 'Lifeaid Smart Assistant',
@@ -74,7 +79,12 @@ const translations = {
     startChat: 'Start Conversation',
     nameRequired: 'Name is required',
     emailRequired: 'Email is required',
-    emailInvalid: 'Invalid email format'
+    emailInvalid: 'Invalid email format',
+    endChat: 'End Chat',
+    confirmEndChat: 'Are you sure you want to end this chat session? The transcript will be sent to our email.',
+    chatEnded: 'Chat session ended. Transcript has been sent.',
+    chatClosingWarning: 'Chat will end automatically in 2 minutes due to inactivity.',
+    typeMessage: 'Type a message...'
   }
 };
 
@@ -101,8 +111,46 @@ const WhatsAppBubbleChat: React.FC = () => {
   const [isSending, setIsSending] = useState(false);
   const [userData, setUserData] = useState<UserData>({ name: '', email: '', phone: '' });
   const [formErrors, setFormErrors] = useState<FormErrors>({});
+  const [sessionId, setSessionId] = useState<string>('');
+  const [unreadCount, setUnreadCount] = useState(0);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const chatBodyRef = useRef<HTMLDivElement>(null);
+
+  // Helper to generate UUID-like string
+  const generateSessionId = () => {
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+      const r = Math.random() * 16 | 0, v = c === 'x' ? r : (r & 0x3 | 0x8);
+      return v.toString(16);
+    });
+  };
+
+  // Restore session from localStorage
+  useEffect(() => {
+    const savedSessionId = localStorage.getItem('lifeaid_chat_session_id');
+    const savedUserData = localStorage.getItem('lifeaid_chat_user_data');
+    const savedHistory = localStorage.getItem('lifeaid_chat_history');
+    const savedMode = localStorage.getItem('lifeaid_chat_mode');
+
+    if (savedSessionId && savedUserData && savedMode === 'website') {
+      setSessionId(savedSessionId);
+      setUserData(JSON.parse(savedUserData));
+      if (savedHistory) {
+        setChatHistory(JSON.parse(savedHistory));
+      }
+      setChatMode('website');
+      console.log('Restored chat session:', savedSessionId);
+    }
+  }, []);
+
+  // Save session to localStorage
+  useEffect(() => {
+    if (chatMode === 'website' && sessionId) {
+      localStorage.setItem('lifeaid_chat_session_id', sessionId);
+      localStorage.setItem('lifeaid_chat_user_data', JSON.stringify(userData));
+      localStorage.setItem('lifeaid_chat_history', JSON.stringify(chatHistory));
+      localStorage.setItem('lifeaid_chat_mode', chatMode);
+    }
+  }, [sessionId, userData, chatHistory, chatMode]);
 
   // EmailJS Refs
   const lastMessageTimeRef = useRef<number>(0);
@@ -111,9 +159,18 @@ const WhatsAppBubbleChat: React.FC = () => {
   const userDataRef = useRef<UserData>({ name: '', email: '', phone: '' });
   const currentLangRef = useRef<Language>(currentLang);
 
+  const warningTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const isOpenRef = useRef(isOpen);
+
   // Keep refs updated
   useEffect(() => {
+    isOpenRef.current = isOpen;
+  }, [isOpen]);
+
+  useEffect(() => {
     chatHistoryRef.current = chatHistory;
+    // Don't auto-scroll if user is reading (scrolled up) could be added here, 
+    // but for now keeping it simple.
   }, [chatHistory]);
 
   useEffect(() => {
@@ -157,12 +214,19 @@ const WhatsAppBubbleChat: React.FC = () => {
     }
   }, [isOpen, chatMode]);
 
-  // Auto scroll to bottom when new message
+  // Auto scroll to bottom when new message or when opening chat
   useEffect(() => {
-    if (chatBodyRef.current) {
+    if (isOpen && chatBodyRef.current) {
       chatBodyRef.current.scrollTop = chatBodyRef.current.scrollHeight;
     }
-  }, [chatHistory]);
+  }, [chatHistory, isOpen]);
+
+  // Handle unread count clearing
+  useEffect(() => {
+    if (isOpen) {
+      setUnreadCount(0);
+    }
+  }, [isOpen]);
 
   // Close chat on Escape key
   useEffect(() => {
@@ -195,42 +259,19 @@ const WhatsAppBubbleChat: React.FC = () => {
   }, []);
 
   // Removed 3-minute interval check as per user request.
-  // Emails are now sent immediately after AI response.
+  // Emails are now sent on 'End Chat' or after 7 minutes of inactivity.
 
-  const sendTranscriptEmail = async () => {
-    const user = userDataRef.current;
-    const history = chatHistoryRef.current;
-    const lang = currentLangRef.current;
+  const sendTranscriptEmail = async (data?: UserData) => {
+    const user = data || userData;
+    if (!user.email) return;
 
-    if (!user.email || history.length === 0) return;
+    // Calculate full transcript
+    let fullTranscript = chatHistoryRef.current
+      .map(msg => `[${msg.time}] ${msg.sender.toUpperCase()}: ${msg.text}`)
+      .join('\n\n');
 
-    // Get greeting message
-    const greetingHtml = `
-      <div class="message-wrapper support">
-        <div class="bubble support">
-          <div class="sender-name">Lifeaid Smart Assistant</div>
-          ${translations[lang].greeting}
-          <span class="time">${translations[lang].justNow}</span>
-        </div>
-      </div>
-    `;
-
-    // Format chat transcript as HTML for the email template
-    const historyHtml = history.map(msg => {
-      const type = msg.sender === 'user' ? 'user' : 'support';
-      const name = msg.sender === 'user' ? user.name : 'Lifeaid Smart Assistant';
-      return `
-        <div class="message-wrapper ${type}">
-          <div class="bubble ${type}">
-            <div class="sender-name">${name}</div>
-            ${msg.text}
-            <span class="time">${msg.time}</span>
-          </div>
-        </div>
-      `;
-    }).join('');
-
-    const fullTranscript = greetingHtml + historyHtml;
+    // Add final message if calling from end timer/button
+    fullTranscript += `\n\n[System]: Chat session ended at ${getCurrentTime()}`;
 
     const templateParams = {
       user_name: user.name,
@@ -258,38 +299,13 @@ const WhatsAppBubbleChat: React.FC = () => {
     }
   };
 
-  const sendInitialEmail = async (data: UserData) => {
-    if (!data.email) return;
-
-    const templateParams = {
-      user_name: data.name,
-      user_email: data.email,
-      user_phone: data.phone,
-      chat_transcript: "User has started a new chat session.",
-      to_email: 'YOUR_EMAIL_HERE'
-    };
-
-    try {
-      // Only attempt to send if credentials are not placeholders
-      if (CONFIG.emailjs.serviceId !== 'YOUR_SERVICE_ID') {
-        await emailjs.send(
-          CONFIG.emailjs.serviceId,
-          CONFIG.emailjs.templateId,
-          templateParams,
-          CONFIG.emailjs.publicKey
-        );
-        console.log('Initial user data sent to email');
-      } else {
-        console.log('EmailJS credentials missing, skipping initial email. Data:', templateParams);
-      }
-    } catch (error) {
-      console.error('Failed to send initial user data:', error);
-    }
-  };
+  // sendInitialEmail removed
 
   const toggleChat = () => {
     setIsOpen(!isOpen);
-    if (!isOpen) {
+    // Logic changed: Only reset to choice if NO active session and opening
+    // If we have sessionId, we want to Resume what they were doing
+    if (!isOpen && !sessionId) {
       setChatMode('choice');
     }
   };
@@ -327,10 +343,14 @@ const WhatsAppBubbleChat: React.FC = () => {
     e.preventDefault();
     if (validateForm()) {
       setChatMode('website');
+
+      // Generate new session ID
+      const newSessionId = generateSessionId();
+      setSessionId(newSessionId);
+
       // Initialize email timer reference
       lastEmailSentTimeRef.current = Date.now();
-      // Send initial email
-      sendInitialEmail(userData);
+      // sendInitialEmail removed as per request
     }
   };
 
@@ -396,16 +416,58 @@ const WhatsAppBubbleChat: React.FC = () => {
     // Remove excessive newlines
     let formatted = text.replace(/\n{3,}/g, '\n\n');
 
-    // Convert markdown-style formatting to HTML
+    // Store replaced links to avoid double-linking
+    const links: string[] = [];
+    // Use hyphens to avoid conflict with italic regex (underscores)
+    const placeholder = (index: number) => `{{{LINK-REF-${index}}}}`;
+
+    // 0. Handle Markdown links [label](url) first
+    formatted = formatted.replace(
+      /\[([^\]]+)\]\((https?:\/\/[^\)]+)\)/g,
+      (_, label, url) => {
+        const linkHtml = `<a href="${url}" target="_blank" rel="noopener noreferrer" style="text-decoration:underline;">${label}</a>`;
+        links.push(linkHtml);
+        return placeholder(links.length - 1);
+      }
+    );
+
+    // 1. Convert markdown-style formatting to HTML (Bold, Italic)
     formatted = formatted
-      // Bold: **text** or __text__
       .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
       .replace(/__(.+?)__/g, '<strong>$1</strong>')
-      // Italic: *text* or _text_
       .replace(/\*(.+?)\*/g, '<em>$1</em>')
-      .replace(/_(.+?)_/g, '<em>$1</em>')
-      // Line breaks
-      .replace(/\n/g, '<br>');
+      .replace(/_(.+?)_/g, '<em>$1</em>');
+
+    // 2. Auto-link bare URLs (http/https/www)
+    // Exclude quotes from the url match to be safe
+    formatted = formatted.replace(
+      /((https?:\/\/|www\.)[^\s<"']+)/g,
+      (match) => {
+        // Strip trailing punctuation
+        let url = match;
+        const punctuation = /[.,;:)]$/;
+        let suffix = '';
+        if (punctuation.test(url)) {
+          suffix = url.charAt(url.length - 1);
+          url = url.slice(0, -1);
+        }
+
+        let href = url;
+        if (url.startsWith('www.')) {
+          href = 'https://' + url;
+        }
+
+        return `<a href="${href}" target="_blank" rel="noopener noreferrer" style="text-decoration:underline;">${url}</a>${suffix}`;
+      }
+    );
+
+    // 3. Restore placeholders
+    links.forEach((link, index) => {
+      formatted = formatted.replace(placeholder(index), link);
+    });
+
+    // 4. Line breaks
+    formatted = formatted.replace(/\n/g, '<br>');
 
     return formatted.trim();
   };
@@ -426,7 +488,8 @@ const WhatsAppBubbleChat: React.FC = () => {
         source: 'website-chat',
         userAgent: navigator.userAgent,
         url: window.location.href,
-        userData: userData
+        userData: userData,
+        sessionId: sessionId // Send the session ID to n8n
       };
 
       console.log('Sending to n8n:', payload);
@@ -460,6 +523,115 @@ const WhatsAppBubbleChat: React.FC = () => {
     }
   };
 
+  // Handle Inactivity Timer (using Interval + Ref for robustness)
+  // Check every 1 minute
+  useEffect(() => {
+    let interval: ReturnType<typeof setInterval>;
+
+    // Only run if website chat is active and has messages (started)
+    if (chatMode === 'website' && chatHistory.length > 0) {
+      // Set interval to check every 30 seconds
+      interval = setInterval(() => {
+        const now = Date.now();
+        // Check for inactivity based on last message/activity time
+        // Or better: use a dedicated lastActivityTimeRef.
+        // Let's rely on lastMessageTimeRef which we update on msg. But wait, lastMessageTimeRef logic might need update.
+        // Actually earlier code used lastEmailSentTimeRef as "start time" for timer? 
+        // No, let's use a specific ref for this logic.
+
+        // We need to track LAST ACTIVITY time (user or support message)
+        const lastActivity = lastMessageTimeRef.current || Date.now();
+        const diff = now - lastActivity;
+
+        // 5 Minutes Warning (300000 ms)
+        // Check if we haven't warned yet AND time is between 5 and 7 mins
+        if (diff >= 5 * 60 * 1000 && diff < 7 * 60 * 1000) {
+          // We need a ref to track if warning was sent to avoid dups
+          if (!warningTimeoutRef.current) { // using this ref as a boolean flag essentially
+            const warningMsg = {
+              text: translations[currentLang].chatClosingWarning,
+              sender: 'support' as const,
+              time: getCurrentTime()
+            };
+            setChatHistory(prev => [...prev, warningMsg]);
+            if (!isOpenRef.current) {
+              setUnreadCount(prev => prev + 1);
+            }
+            // Mark warned
+            warningTimeoutRef.current = setTimeout(() => { }, 0); // just setting it to not-null
+          }
+        }
+
+        // 7 Minutes End (420000 ms)
+        if (diff >= 7 * 60 * 1000) {
+          console.log('Inactivity timeout reached (7 mins). Ending session...');
+          clearInterval(interval);
+
+          sendTranscriptEmail(userData);
+
+          const timeoutMsg = {
+            text: currentLang === 'id' ? 'Sesi berakhir karena tidak ada aktivitas.' : 'Session ended due to inactivity.',
+            sender: 'support' as const,
+            time: getCurrentTime()
+          };
+          setChatHistory(prev => [...prev, timeoutMsg]);
+
+          // Clear session
+          localStorage.removeItem('lifeaid_chat_session_id');
+          localStorage.removeItem('lifeaid_chat_user_data');
+          localStorage.removeItem('lifeaid_chat_history');
+          localStorage.removeItem('lifeaid_chat_mode');
+
+          setTimeout(() => {
+            setChatMode('choice');
+            setSessionId('');
+            setChatHistory([]);
+          }, 3000);
+        }
+      }, 30000); // Check every 30s
+    }
+
+    return () => {
+      if (interval) clearInterval(interval);
+      // Note: we DON'T clear warning flag here because re-renders shouldn't reset our "warned" state unless chat ended
+      // But chatMode/chatHistory changes might reset this effect.
+      // If user sends message, chatHistory changes -> effect re-runs.
+      // We WANT to reset warning flag if user sends message.
+    };
+  }, [chatHistory, chatMode, currentLang]);
+
+  // NOTE: We need to reset warningTimeoutRef (flag) when user sends message.
+  // We can do this in sendMessage.
+
+  const handleEndChat = () => {
+    if (window.confirm(translations[currentLang].confirmEndChat)) {
+      sendTranscriptEmail();
+      // Clear interval logic handling handled by unmount/state change
+
+      const endMsg = {
+        text: translations[currentLang].chatEnded,
+        sender: 'support' as const,
+        time: getCurrentTime()
+      };
+      setChatHistory(prev => [...prev, endMsg]);
+
+      // Clear session data
+      localStorage.removeItem('lifeaid_chat_session_id');
+      localStorage.removeItem('lifeaid_chat_user_data');
+      localStorage.removeItem('lifeaid_chat_history');
+      localStorage.removeItem('lifeaid_chat_mode');
+
+      setTimeout(() => {
+        setChatMode('choice');
+        setSessionId('');
+        setChatHistory([]); // Clear visual history after a moment
+        setIsOpen(false);
+      }, 2000);
+    }
+  };
+
+
+
   const sendMessage = async () => {
     const msg = message.trim();
     if (!msg || isSending) return;
@@ -487,6 +659,7 @@ const WhatsAppBubbleChat: React.FC = () => {
 
       // Update last message time
       lastMessageTimeRef.current = Date.now();
+      warningTimeoutRef.current = null; // Reset warning flag on user activity
 
       setMessage('');
       if (inputRef.current) {
@@ -531,14 +704,17 @@ const WhatsAppBubbleChat: React.FC = () => {
           chatHistoryRef.current = updatedHistoryWithSupport;
           setChatHistory(updatedHistoryWithSupport);
 
+          // Increment unread count if chat is closed
+          if (!isOpenRef.current) {
+            setUnreadCount(prev => prev + 1);
+          }
+
           // Update last message time for support response too
           lastMessageTimeRef.current = Date.now();
 
           setIsSending(false);
 
-          // Send email transcript immediately after support response
-          // This will now definitely include the supportMsg because we updated the ref above
-          await sendTranscriptEmail();
+          // Timer will naturally reset due to chatHistory change in useEffect
         }, 800);
       } catch (error) {
         console.error('Failed to send message:', error);
@@ -590,15 +766,38 @@ const WhatsAppBubbleChat: React.FC = () => {
                 <span className="wa-status-text">{t.statusText}</span>
               </div>
             </div>
-            <button
-              className="wa-close-btn"
-              onClick={toggleChat}
-              aria-label="Close chat"
-            >
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M18 6L6 18M6 6l12 12" />
-              </svg>
-            </button>
+            <div className="wa-header-controls" style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+              {chatMode === 'website' && (
+                <button
+                  className="wa-end-chat-btn"
+                  onClick={handleEndChat}
+                  title={t.endChat}
+                  style={{
+                    background: 'rgba(255,255,255,0.2)',
+                    border: 'none',
+                    borderRadius: '4px',
+                    color: 'white',
+                    padding: '4px 8px',
+                    cursor: 'pointer',
+                    fontSize: '12px'
+                  }}
+                >
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ verticalAlign: 'middle' }}>
+                    <path d="M18.36 6.64a9 9 0 1 1-12.73 0"></path>
+                    <line x1="12" y1="2" x2="12" y2="12"></line>
+                  </svg>
+                </button>
+              )}
+              <button
+                className="wa-close-btn"
+                onClick={toggleChat}
+                aria-label="Close chat"
+              >
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M18 6L6 18M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
           </div>
 
           {/* Choice Mode */}
@@ -801,7 +1000,9 @@ const WhatsAppBubbleChat: React.FC = () => {
             <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z" />
             </svg>
-            <span className="wa-notification-badge">1</span>
+            {unreadCount > 0 && (
+              <span className="wa-notification-badge">{unreadCount}</span>
+            )}
           </button>
         </div>
       </div>

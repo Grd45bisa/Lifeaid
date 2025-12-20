@@ -32,7 +32,7 @@ To start the development server:
 npm run dev
 ```
 
-The application will be available at `http://localhost:5173` (or another port if 5173 is in use).
+The application will be available at `http://localhost:5200` (or another port if 5200 is in use).
 
 ### Building for Production
 

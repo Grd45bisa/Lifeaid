@@ -111,7 +111,10 @@ const Accessories: React.FC = () => {
           <div
             key={index}
             className="accessories-card"
-            onClick={() => navigate(`/product/${item.slug}`)}
+            onClick={() => {
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+              navigate(`/product/${item.slug}`);
+            }}
             style={{ cursor: 'pointer' }}
           >
             <div className="img-wrapper">
