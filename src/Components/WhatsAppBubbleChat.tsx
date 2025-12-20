@@ -126,10 +126,10 @@ const WhatsAppBubbleChat: React.FC = () => {
 
   // Restore session from localStorage
   useEffect(() => {
-    const savedSessionId = localStorage.getItem('lifeaid_chat_session_id');
-    const savedUserData = localStorage.getItem('lifeaid_chat_user_data');
-    const savedHistory = localStorage.getItem('lifeaid_chat_history');
-    const savedMode = localStorage.getItem('lifeaid_chat_mode');
+    const savedSessionId = sessionStorage.getItem('lifeaid_chat_session_id');
+    const savedUserData = sessionStorage.getItem('lifeaid_chat_user_data');
+    const savedHistory = sessionStorage.getItem('lifeaid_chat_history');
+    const savedMode = sessionStorage.getItem('lifeaid_chat_mode');
 
     if (savedSessionId && savedUserData && savedMode === 'website') {
       setSessionId(savedSessionId);
@@ -138,17 +138,17 @@ const WhatsAppBubbleChat: React.FC = () => {
         setChatHistory(JSON.parse(savedHistory));
       }
       setChatMode('website');
-      console.log('Restored chat session:', savedSessionId);
+      console.log('Restored chat session from sessionStorage:', savedSessionId);
     }
   }, []);
 
-  // Save session to localStorage
+  // Save session to sessionStorage
   useEffect(() => {
     if (chatMode === 'website' && sessionId) {
-      localStorage.setItem('lifeaid_chat_session_id', sessionId);
-      localStorage.setItem('lifeaid_chat_user_data', JSON.stringify(userData));
-      localStorage.setItem('lifeaid_chat_history', JSON.stringify(chatHistory));
-      localStorage.setItem('lifeaid_chat_mode', chatMode);
+      sessionStorage.setItem('lifeaid_chat_session_id', sessionId);
+      sessionStorage.setItem('lifeaid_chat_user_data', JSON.stringify(userData));
+      sessionStorage.setItem('lifeaid_chat_history', JSON.stringify(chatHistory));
+      sessionStorage.setItem('lifeaid_chat_mode', chatMode);
     }
   }, [sessionId, userData, chatHistory, chatMode]);
 
@@ -262,6 +262,90 @@ const WhatsAppBubbleChat: React.FC = () => {
   // Removed 3-minute interval check as per user request.
   // Emails are now sent on 'End Chat' or after 7 minutes of inactivity.
 
+  // Page Unload Handling (Send Transcript on Close)
+  useEffect(() => {
+    const handleBeforeUnload = () => {
+      // Check if we have active session data (Email is required at minimum)
+      if (
+        userDataRef.current.email &&
+        CONFIG.emailjs.serviceId // Simply check if serviceId exists
+      ) {
+        const user = userDataRef.current;
+        const lang = currentLangRef.current;
+        const history = chatHistoryRef.current;
+
+        let fullTranscript = '';
+
+        if (history.length > 0) {
+          // Generate HTML for Chat Bubbles
+          fullTranscript = history
+            .map(msg => {
+              const isUser = msg.sender === 'user';
+              const align = isUser ? 'right' : 'left';
+              const bgColor = isUser ? '#224570' : '#f0f2f5';
+              const textColor = isUser ? '#ffffff' : '#111b21';
+              const radius = isUser ? '8px 8px 0 8px' : '0 8px 8px 8px';
+              const senderName = isUser ? user.name || 'User' : translations[lang].supportName;
+
+              return `
+                <div style="width: 100%; overflow: hidden; margin-bottom: 12px; font-family: 'Segoe UI', sans-serif;">
+                  <div style="float: ${align}; max-width: 80%; background-color: ${bgColor}; color: ${textColor}; padding: 12px 14px; border-radius: ${radius}; box-shadow: 0 1px 2px rgba(0,0,0,0.1);">
+                    <div style="font-size: 11px; font-weight: 600; margin-bottom: 4px; opacity: 0.9;">${senderName}</div>
+                    <div style="font-size: 14px; line-height: 1.5; white-space: pre-wrap;">${msg.text}</div>
+                    <div style="font-size: 10px; margin-top: 6px; text-align: right; opacity: 0.8;">${msg.time}</div>
+                  </div>
+                  <div style="clear: both;"></div>
+                </div>
+              `;
+            })
+            .join('');
+        } else {
+          // Drop-off case: Form filled but no messages
+          fullTranscript = `
+              <div style="width: 100%; text-align: center; margin: 20px 0; font-family: 'Segoe UI', sans-serif;">
+                <p style="color: #666; font-size: 14px; font-style: italic;">[System]: User submitted details but did not send any message (Drop-off Lead caused by Page Close).</p>
+              </div>
+            `;
+        }
+
+        // Add footer
+        fullTranscript += `
+            <div style="width: 100%; text-align: center; margin-top: 20px; padding-top: 10px; border-top: 1px dashed #e0e0e0;">
+              <span style="background-color: #f5f5f5; padding: 4px 10px; border-radius: 12px; font-size: 11px; color: #888;">
+                System: Chat session ended (Page Closed) at ${new Date().toLocaleTimeString()}
+              </span>
+            </div>
+          `;
+
+        const data = {
+          service_id: CONFIG.emailjs.serviceId,
+          template_id: CONFIG.emailjs.templateId,
+          user_id: CONFIG.emailjs.publicKey,
+          template_params: {
+            user_name: user.name,
+            user_email: user.email,
+            user_phone: user.phone,
+            chat_transcript: fullTranscript,
+            to_email: 'fahmi.lifeaid@gmail.com'
+          }
+        };
+
+        // Use fetch with keepalive: true to ensure request completes after unload
+        fetch('https://api.emailjs.com/api/v1.0/email/send', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(data),
+          keepalive: true,
+        });
+      }
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+  }, []);
+
   const sendTranscriptEmail = async (data?: UserData) => {
     const user = data || userData;
     if (!user.email) return;
@@ -304,12 +388,12 @@ const WhatsAppBubbleChat: React.FC = () => {
       user_email: user.email,
       user_phone: user.phone,
       chat_transcript: fullTranscript, // This HTML will be injected
-      to_email: 'YOUR_EMAIL_HERE'
+      to_email: 'fahmi.lifeaid@gmail.com'
     };
 
     try {
       // Only attempt to send if credentials are not placeholders
-      if (CONFIG.emailjs.serviceId !== 'YOUR_SERVICE_ID') {
+      if (CONFIG.emailjs.serviceId) {
         await emailjs.send(
           CONFIG.emailjs.serviceId,
           CONFIG.emailjs.templateId,
@@ -333,12 +417,21 @@ const WhatsAppBubbleChat: React.FC = () => {
       user_name: data.name,
       user_email: data.email,
       user_phone: data.phone,
-      chat_transcript: "[System]: User submitted details but did not send a message within 3 minutes (Drop-off Lead).",
+      chat_transcript: `
+        <div style="width: 100%; text-align: center; margin: 20px 0; font-family: 'Segoe UI', sans-serif;">
+            <p style="color: #666; font-size: 14px; font-style: italic;">[System]: User submitted details but did not send a message within 3 minutes (Drop-off Lead).</p>
+        </div>
+        <div style="width: 100%; text-align: center; margin-top: 20px; padding-top: 10px; border-top: 1px dashed #e0e0e0;">
+            <span style="background-color: #f5f5f5; padding: 4px 10px; border-radius: 12px; font-size: 11px; color: #888;">
+              System: Lead Capture Timer triggered at ${new Date().toLocaleTimeString()}
+            </span>
+        </div>
+      `,
       to_email: 'YOUR_EMAIL_HERE'
     };
 
     try {
-      if (CONFIG.emailjs.serviceId !== 'YOUR_SERVICE_ID') {
+      if (CONFIG.emailjs.serviceId) {
         await emailjs.send(
           CONFIG.emailjs.serviceId,
           CONFIG.emailjs.templateId,
@@ -636,10 +729,10 @@ const WhatsAppBubbleChat: React.FC = () => {
           setChatHistory(prev => [...prev, timeoutMsg]);
 
           // Clear session
-          localStorage.removeItem('lifeaid_chat_session_id');
-          localStorage.removeItem('lifeaid_chat_user_data');
-          localStorage.removeItem('lifeaid_chat_history');
-          localStorage.removeItem('lifeaid_chat_mode');
+          sessionStorage.removeItem('lifeaid_chat_session_id');
+          sessionStorage.removeItem('lifeaid_chat_user_data');
+          sessionStorage.removeItem('lifeaid_chat_history');
+          sessionStorage.removeItem('lifeaid_chat_mode');
 
           setTimeout(() => {
             setChatMode('choice');
@@ -675,10 +768,10 @@ const WhatsAppBubbleChat: React.FC = () => {
       setChatHistory(prev => [...prev, endMsg]);
 
       // Clear session data
-      localStorage.removeItem('lifeaid_chat_session_id');
-      localStorage.removeItem('lifeaid_chat_user_data');
-      localStorage.removeItem('lifeaid_chat_history');
-      localStorage.removeItem('lifeaid_chat_mode');
+      sessionStorage.removeItem('lifeaid_chat_session_id');
+      sessionStorage.removeItem('lifeaid_chat_user_data');
+      sessionStorage.removeItem('lifeaid_chat_history');
+      sessionStorage.removeItem('lifeaid_chat_mode');
 
       setTimeout(() => {
         setChatMode('choice');
@@ -876,7 +969,10 @@ const WhatsAppBubbleChat: React.FC = () => {
               <div className="wa-choice-options">
                 <button
                   className="wa-choice-option"
-                  onClick={() => handleModeSelect('whatsapp')}
+                  onClick={() => {
+                    window.open(`https://wa.me/${CONFIG.phoneNumber}`, '_blank');
+                    setIsOpen(false);
+                  }}
                 >
                   <div className="wa-choice-icon whatsapp-icon">
                     <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
