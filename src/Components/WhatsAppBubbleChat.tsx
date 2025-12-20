@@ -383,6 +383,20 @@ const WhatsAppBubbleChat: React.FC = () => {
       </div>
     `;
 
+    // --- PLAIN TEXT LOG GENERATION ---
+    // Generate a simple text version for backup/copy-paste
+    const plainTextLog = chatHistoryRef.current
+      .map(msg => `[${msg.time}] ${msg.sender === 'user' ? (user.name || 'User') : 'Support'}: ${msg.text}`)
+      .join('\n');
+
+    fullTranscript += `
+      <!-- PLAIN TEXT LOG SECTION -->
+      <div style="margin-top: 30px; padding-top: 20px; border-top: 2px solid #ddd;">
+        <h3 style="font-size: 14px; color: #444; margin-bottom: 10px; font-family: monospace;">📋 Raw Text Log (For Backup)</h3>
+        <pre style="background-color: #f8f9fa; border: 1px solid #e9ecef; padding: 15px; border-radius: 6px; font-size: 12px; font-family: 'Consolas', 'Courier New', monospace; white-space: pre-wrap; color: #333; line-height: 1.5;">${plainTextLog}</pre>
+      </div>
+    `;
+
     const templateParams = {
       user_name: user.name,
       user_email: user.email,
@@ -410,8 +424,14 @@ const WhatsAppBubbleChat: React.FC = () => {
 
   };
 
-  const sendLeadCaptureEmail = async (data: UserData) => {
+  const sendLeadCaptureEmail = async (data: UserData, isDropOff: boolean = false) => {
     if (!data.email) return;
+
+    const messageContent = isDropOff
+      ? `[System]: User submitted details but did not send a message within 3 minutes (Drop-off Lead).`
+      : `[System]: New Chat Session Started. User has filled the form and entered the chat room.`;
+
+    const titleContent = isDropOff ? 'Drop-off Lead Alert' : 'New Chat Notification';
 
     const templateParams = {
       user_name: data.name,
@@ -419,15 +439,15 @@ const WhatsAppBubbleChat: React.FC = () => {
       user_phone: data.phone,
       chat_transcript: `
         <div style="width: 100%; text-align: center; margin: 20px 0; font-family: 'Segoe UI', sans-serif;">
-            <p style="color: #666; font-size: 14px; font-style: italic;">[System]: User submitted details but did not send a message within 3 minutes (Drop-off Lead).</p>
+            <p style="color: #666; font-size: 14px; font-style: italic;">${messageContent}</p>
         </div>
         <div style="width: 100%; text-align: center; margin-top: 20px; padding-top: 10px; border-top: 1px dashed #e0e0e0;">
             <span style="background-color: #f5f5f5; padding: 4px 10px; border-radius: 12px; font-size: 11px; color: #888;">
-              System: Lead Capture Timer triggered at ${new Date().toLocaleTimeString()}
+              System: ${titleContent} triggered at ${new Date().toLocaleTimeString()}
             </span>
         </div>
       `,
-      to_email: 'YOUR_EMAIL_HERE'
+      to_email: 'fahmi.lifeaid@gmail.com'
     };
 
     try {
@@ -438,7 +458,7 @@ const WhatsAppBubbleChat: React.FC = () => {
           templateParams,
           CONFIG.emailjs.publicKey
         );
-        console.log('Lead capture email sent');
+        console.log(`Lead capture email sent (${isDropOff ? 'Drop-off' : 'Immediate'})`);
       }
     } catch (error) {
       console.error('Failed to send lead capture email:', error);
@@ -494,14 +514,22 @@ const WhatsAppBubbleChat: React.FC = () => {
       const newSessionId = generateSessionId();
       setSessionId(newSessionId);
 
-      // Initialize email timer reference
+      // Initialize email timer reference & last message time
       lastEmailSentTimeRef.current = Date.now();
+      lastMessageTimeRef.current = Date.now();
 
-      // Start Lead Capture Timer (3 minutes)
+      // SEND IMMEDIATE EMAIL (New Chat Notification)
+      console.log('Sending immediate new chat notification...');
+      sendLeadCaptureEmail(userData, false); // false = immediate notification
+
+      // Start Lead Capture Timer (3 minutes) as backup for "Drop-off"
       if (leadCaptureTimeoutRef.current) clearTimeout(leadCaptureTimeoutRef.current);
       leadCaptureTimeoutRef.current = setTimeout(() => {
-        console.log('Lead capture timer triggered');
-        sendLeadCaptureEmail(userData);
+        // Only send drop-off email if NO messages have been sent yet (history empty)
+        if (chatHistoryRef.current.length === 0) {
+          console.log('No activity for 3 mins, sending drop-off alert...');
+          sendLeadCaptureEmail(userData, true); // true = isDropOff
+        }
       }, 3 * 60 * 1000);
     }
   };
@@ -902,6 +930,8 @@ const WhatsAppBubbleChat: React.FC = () => {
   };
 
   const t = translations[currentLang];
+
+
 
   if (isHidden) return null;
 
