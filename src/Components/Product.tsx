@@ -69,9 +69,13 @@ const Product: React.FC = () => {
     const loadContent = async () => {
       try {
         const useDb = await isUsingDatabaseProducts();
+        console.log('[Product] useDb:', useDb);
         if (useDb) {
           const dbContent = await fetchFeaturedProduct();
+          console.log('[Product] dbContent:', dbContent);
           setContent(dbContent);
+        } else {
+          console.log('[Product] Using default content');
         }
       } catch (err) {
         console.error('Error loading featured product:', err);
