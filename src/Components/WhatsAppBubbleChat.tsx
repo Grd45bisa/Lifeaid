@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import './styles/WhatsAppBubbleChat.css';
 import emailjs from '@emailjs/browser';
+import { supabase } from '../utils/supabaseClient';
 
 type Language = 'id' | 'en';
 type ChatMode = 'choice' | 'whatsapp' | 'website' | 'form';
@@ -505,7 +506,7 @@ const WhatsAppBubbleChat: React.FC = () => {
     return isValid;
   };
 
-  const handleFormSubmit = (e: React.FormEvent) => {
+  const handleFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (validateForm()) {
       setChatMode('website');
@@ -517,6 +518,27 @@ const WhatsAppBubbleChat: React.FC = () => {
       // Initialize email timer reference & last message time
       lastEmailSentTimeRef.current = Date.now();
       lastMessageTimeRef.current = Date.now();
+
+      // SAVE INITIAL ENTRY TO SUPABASE (so it appears in Admin Chat History)
+      try {
+        const { error } = await supabase.from('chat_memory').insert({
+          session_id: newSessionId,
+          role: 'system',
+          content: currentLang === 'id'
+            ? `📋 Form terisi: ${userData.name} (${userData.email})${userData.phone ? ` - ${userData.phone}` : ''}`
+            : `📋 Form submitted: ${userData.name} (${userData.email})${userData.phone ? ` - ${userData.phone}` : ''}`,
+          metadata: {
+            name: userData.name,
+            email: userData.email,
+            phone: userData.phone,
+            type: 'form_submission'
+          }
+        });
+        if (error) console.error('Supabase initial save error:', error);
+        else console.log('Initial form entry saved to Supabase');
+      } catch (err) {
+        console.error('Failed to save initial entry:', err);
+      }
 
       // SEND IMMEDIATE EMAIL (New Chat Notification)
       console.log('Sending immediate new chat notification...');
@@ -703,6 +725,33 @@ const WhatsAppBubbleChat: React.FC = () => {
     }
   };
 
+  // Save message to Supabase for Admin Dashboard
+  const saveMessageToSupabase = async (
+    role: 'user' | 'assistant',
+    content: string
+  ) => {
+    try {
+      const { error } = await supabase.from('chat_memory').insert({
+        session_id: sessionId,
+        role: role,
+        content: content,
+        metadata: {
+          name: userData.name,
+          email: userData.email,
+          phone: userData.phone
+        }
+      });
+
+      if (error) {
+        console.error('Supabase save error:', error);
+      } else {
+        console.log(`Message saved to Supabase: ${role}`);
+      }
+    } catch (err) {
+      console.error('Failed to save message to Supabase:', err);
+    }
+  };
+
   // Handle Inactivity Timer (using Interval + Ref for robustness)
   // Check every 1 minute
   useEffect(() => {
@@ -837,6 +886,9 @@ const WhatsAppBubbleChat: React.FC = () => {
       chatHistoryRef.current = updatedHistoryWithUser;
       setChatHistory(updatedHistoryWithUser);
 
+      // Save user message to Supabase for Admin Dashboard
+      saveMessageToSupabase('user', msg);
+
       // Update last message time
       lastMessageTimeRef.current = Date.now();
       warningTimeoutRef.current = null; // Reset warning flag on user activity
@@ -889,6 +941,9 @@ const WhatsAppBubbleChat: React.FC = () => {
           const updatedHistoryWithSupport = [...chatHistoryRef.current, supportMsg];
           chatHistoryRef.current = updatedHistoryWithSupport;
           setChatHistory(updatedHistoryWithSupport);
+
+          // Save AI response to Supabase for Admin Dashboard
+          saveMessageToSupabase('assistant', responseText);
 
           // Increment unread count if chat is closed
           if (!isOpenRef.current) {

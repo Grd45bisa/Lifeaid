@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import emailjs from '@emailjs/browser';
+import { supabase } from '../utils/supabaseClient';
 import './styles/Footer.css';
 
 // Language type
@@ -57,11 +58,11 @@ const translations = {
   }
 };
 
-// EmailJS Configuration
+// EmailJS Configuration - Same as CTA section
 const EMAILJS_CONFIG = {
-  serviceId: 'asd',
-  templateId: 'asd',
-  publicKey: 'asd'
+  serviceId: 'service_ovo0bkw',
+  templateId: 'template_dgpejqd',
+  publicKey: '-k0Z6rJV5VsKb-VXV'
 };
 
 // Detect language
@@ -119,6 +120,26 @@ const Footer: React.FC = () => {
     setSubmitStatus('idle');
 
     try {
+      // SAVE TO SUPABASE CONTACT_MESSAGES
+      const { error: supabaseError } = await supabase
+        .from('contact_messages')
+        .insert({
+          name: 'Newsletter Subscriber',
+          email: email,
+          phone: null,
+          message: `Newsletter subscription from: ${email}`,
+          type: 'subscribe', // Mark as newsletter subscription
+          is_read: false,
+          is_replied: false
+        });
+
+      if (supabaseError) {
+        console.warn('Supabase save failed:', supabaseError.message);
+        // Continue with email even if Supabase fails
+      } else {
+        console.log('✅ Saved to contact_messages (subscribe)');
+      }
+
       // Prepare template parameters
       const templateParams = {
         to_name: 'LifeAid Team',

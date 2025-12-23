@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import type { FormEvent } from 'react';
 import emailjs from '@emailjs/browser';
+import { supabase } from '../utils/supabaseClient';
 import './styles/CTASection.css';
 
 // Language type
@@ -135,6 +136,26 @@ const CTASection: React.FC = () => {
     };
 
     try {
+      // SAVE TO SUPABASE CONTACT_MESSAGES
+      const { error: supabaseError } = await supabase
+        .from('contact_messages')
+        .insert({
+          name: formData.name,
+          email: formData.email,
+          phone: formData.phone || null,
+          message: formData.comment || '',  // Empty string instead of null
+          type: 'consultation', // Mark as consultation form
+          is_read: false,
+          is_replied: false
+        });
+
+      if (supabaseError) {
+        console.warn('Supabase save failed:', supabaseError.message);
+        // Continue with email even if Supabase fails
+      } else {
+        console.log('✅ Saved to contact_messages (consultation)');
+      }
+
       // Send email using EmailJS
       const result = await emailjs.send(
         EMAILJS_CONFIG.SERVICE_ID,

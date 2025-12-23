@@ -1,0 +1,279 @@
+.admin-messages-page {
+    max-width: 1400px;
+    margin: 0 auto;
+    height: calc(100vh - 4rem);
+    display: flex;
+    flex-direction: column;
+}
+
+.page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.page-header h1 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #1a202c;
+    margin: 0;
+}
+
+.filter-tabs {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.filter-tabs button {
+    padding: 0.5rem 1rem;
+    background: #f1f5f9;
+    color: #64748b;
+    border: none;
+    border-radius: 8px;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.filter-tabs button.active {
+    background: #224570;
+    color: white;
+}
+
+.messages-layout {
+    display: grid;
+    grid-template-columns: 380px 1fr;
+    gap: 1rem;
+    flex: 1;
+    min-height: 0;
+}
+
+.messages-list {
+    background: white;
+    border-radius: 12px;
+    border: 1px solid #e5e7eb;
+    overflow-y: auto;
+}
+
+.message-item {
+    padding: 1rem;
+    border-bottom: 1px solid #f1f5f9;
+    cursor: pointer;
+    transition: background 0.15s;
+}
+
+.message-item:hover {
+    background: #f8fafc;
+}
+
+.message-item.selected {
+    background: #eff6ff;
+    border-left: 3px solid #224570;
+}
+
+.message-item.unread {
+    background: #fefce8;
+}
+
+.message-item.unread .message-name {
+    font-weight: 700;
+}
+
+.message-item-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.25rem;
+}
+
+.message-name {
+    font-size: 0.9375rem;
+    font-weight: 600;
+    color: #1a202c;
+}
+
+.message-date {
+    font-size: 0.75rem;
+    color: #a0aec0;
+}
+
+.message-email {
+    font-size: 0.8125rem;
+    color: #64748b;
+    margin: 0 0 0.375rem;
+}
+
+.message-preview {
+    font-size: 0.8125rem;
+    color: #718096;
+    margin: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.replied-badge {
+    display: inline-block;
+    margin-top: 0.375rem;
+    padding: 0.125rem 0.375rem;
+    background: #dcfce7;
+    color: #16a34a;
+    font-size: 0.625rem;
+    font-weight: 600;
+    border-radius: 4px;
+}
+
+.message-detail {
+    background: white;
+    border-radius: 12px;
+    border: 1px solid #e5e7eb;
+    padding: 1.5rem;
+    overflow-y: auto;
+}
+
+.detail-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.detail-header h2 {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #1a202c;
+    margin: 0;
+}
+
+.detail-date {
+    font-size: 0.8125rem;
+    color: #718096;
+}
+
+.detail-email,
+.detail-phone {
+    font-size: 0.9375rem;
+    color: #4a5568;
+    margin: 0.5rem 0;
+}
+
+.detail-message {
+    margin-top: 1.5rem;
+}
+
+.detail-message strong {
+    display: block;
+    margin-bottom: 0.5rem;
+    color: #374151;
+}
+
+.detail-message p {
+    background: #f8fafc;
+    padding: 1rem;
+    border-radius: 8px;
+    color: #1a202c;
+    line-height: 1.6;
+    white-space: pre-wrap;
+}
+
+.detail-actions {
+    display: flex;
+    gap: 0.75rem;
+    margin-top: 1.5rem;
+    padding-top: 1rem;
+    border-top: 1px solid #e5e7eb;
+}
+
+.mark-replied-btn {
+    padding: 0.625rem 1.25rem;
+    background: #16a34a;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.email-btn {
+    padding: 0.625rem 1.25rem;
+    background: #224570;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.no-selection {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    color: #a0aec0;
+}
+
+.loading-state,
+.empty-state {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 3rem;
+}
+
+.loading-state .spinner {
+    width: 32px;
+    height: 32px;
+    border: 3px solid #e5e7eb;
+    border-top-color: #224570;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.error-message {
+    padding: 1rem;
+    background: #fef2f2;
+    border: 1px solid #fecaca;
+    border-radius: 10px;
+    margin-bottom: 1rem;
+}
+
+.error-message p {
+    color: #dc2626;
+    margin: 0;
+}
+
+@media (max-width: 1024px) {
+    .messages-layout {
+        grid-template-columns: 1fr;
+    }
+
+    .message-detail {
+        display: none;
+    }
+
+    .message-item.selected+.message-detail {
+        display: block;
+    }
+}
+
+@media (max-width: 768px) {
+    .page-header {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .filter-tabs {
+        overflow-x: auto;
+    }
+}

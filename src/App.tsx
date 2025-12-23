@@ -1,14 +1,28 @@
 import { Suspense, lazy } from 'react';
-import { Routes, Route } from 'react-router-dom';
+import { Routes, Route, useLocation } from 'react-router-dom';
 import './index.css';
 
-// Lazy load pages
+// Public components
 import Navbar from './Components/Navbar';
 import Footer from './Components/Footer';
 
-// Lazy load pages
+// Lazy load public pages
 const Home = lazy(() => import('./Pages/Home'));
 const ProductDetailPage = lazy(() => import('./Pages/ProductDetailPage'));
+
+// Lazy load admin components
+const AdminLayout = lazy(() => import('./Components/Admin/AdminLayout'));
+const AdminDashboard = lazy(() => import('./Pages/Admin/AdminDashboard'));
+const AdminLogin = lazy(() => import('./Pages/Admin/AdminLogin'));
+const ProtectedRoute = lazy(() => import('./Components/Admin/ProtectedRoute'));
+const AdminChatHistory = lazy(() => import('./Pages/Admin/AdminChatHistory'));
+const AdminChatDetail = lazy(() => import('./Pages/Admin/AdminChatDetail'));
+const AdminProducts = lazy(() => import('./Pages/Admin/AdminProducts'));
+const AdminProductForm = lazy(() => import('./Pages/Admin/AdminProductForm'));
+const AdminTestimonials = lazy(() => import('./Pages/Admin/AdminTestimonials'));
+const AdminTestimonialForm = lazy(() => import('./Pages/Admin/AdminTestimonialForm'));
+const AdminMessages = lazy(() => import('./Pages/Admin/AdminMessages'));
+const AdminSettings = lazy(() => import('./Pages/Admin/AdminSettings'));
 
 // Loading component
 const LoadingFallback = () => (
@@ -45,15 +59,58 @@ const LoadingFallback = () => (
   </div>
 );
 
+// Layout wrapper for public pages
+const PublicLayout = ({ children }: { children: React.ReactNode }) => (
+  <>
+    <Navbar />
+    {children}
+    <Footer />
+  </>
+);
+
 function App() {
+  const location = useLocation();
+  const isAdminRoute = location.pathname.startsWith('/admin');
+
   return (
     <Suspense fallback={<LoadingFallback />}>
-      <Navbar />
-      <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/product/:slug" element={<ProductDetailPage />} />
-      </Routes>
-      <Footer />
+      {isAdminRoute ? (
+        // Admin Routes - without public Navbar/Footer
+        <Routes>
+          {/* Public admin route - Login */}
+          <Route path="/admin/login" element={<AdminLogin />} />
+
+          {/* Protected admin routes */}
+          <Route
+            path="/admin"
+            element={
+              <ProtectedRoute>
+                <AdminLayout />
+              </ProtectedRoute>
+            }
+          >
+            <Route index element={<AdminDashboard />} />
+            <Route path="chat-history" element={<AdminChatHistory />} />
+            <Route path="chat-history/:sessionId" element={<AdminChatDetail />} />
+            <Route path="products" element={<AdminProducts />} />
+            <Route path="products/new" element={<AdminProductForm />} />
+            <Route path="products/edit/:id" element={<AdminProductForm />} />
+            <Route path="testimonials" element={<AdminTestimonials />} />
+            <Route path="testimonials/new" element={<AdminTestimonialForm />} />
+            <Route path="testimonials/edit/:id" element={<AdminTestimonialForm />} />
+            <Route path="messages" element={<AdminMessages />} />
+            <Route path="settings" element={<AdminSettings />} />
+          </Route>
+        </Routes>
+      ) : (
+        // Public Routes - with Navbar/Footer
+        <PublicLayout>
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/product/:slug" element={<ProductDetailPage />} />
+          </Routes>
+        </PublicLayout>
+      )}
     </Suspense>
   );
 }

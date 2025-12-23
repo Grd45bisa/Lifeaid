@@ -1,0 +1,220 @@
+.admin-testimonials-page {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.header-title h1 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #1a202c;
+    margin: 0;
+}
+
+.add-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.625rem 1.25rem;
+    background: #224570;
+    color: white;
+    border: none;
+    border-radius: 10px;
+    font-size: 0.9375rem;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.add-btn:hover {
+    background: #1a365d;
+}
+
+.loading-state,
+.empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 4rem 2rem;
+    background: white;
+    border-radius: 12px;
+    border: 1px solid #e5e7eb;
+}
+
+.loading-state .spinner {
+    width: 36px;
+    height: 36px;
+    border: 3px solid #e5e7eb;
+    border-top-color: #224570;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.loading-state p,
+.empty-state p {
+    margin-top: 1rem;
+    color: #718096;
+}
+
+.error-message {
+    padding: 1rem;
+    background: #fef2f2;
+    border: 1px solid #fecaca;
+    border-radius: 10px;
+    margin-bottom: 1rem;
+}
+
+.error-message p {
+    color: #dc2626;
+    margin: 0;
+}
+
+.testimonials-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 1.25rem;
+}
+
+.testimonial-card {
+    background: white;
+    border-radius: 12px;
+    border: 1px solid #e5e7eb;
+    padding: 1.25rem;
+}
+
+.testimonial-card:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.testimonial-header {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 0.75rem;
+}
+
+.testimonial-avatar {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: #224570;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    flex-shrink: 0;
+}
+
+.testimonial-info {
+    flex: 1;
+}
+
+.testimonial-info h3 {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #1a202c;
+    margin: 0;
+}
+
+.testimonial-info p {
+    font-size: 0.8125rem;
+    color: #718096;
+    margin: 0.125rem 0 0;
+}
+
+.status-badge {
+    padding: 0.25rem 0.5rem;
+    border-radius: 6px;
+    font-size: 0.6875rem;
+    font-weight: 600;
+}
+
+.status-badge.active {
+    background: #dcfce7;
+    color: #16a34a;
+}
+
+.status-badge.inactive {
+    background: #fee2e2;
+    color: #dc2626;
+}
+
+.testimonial-rating {
+    display: flex;
+    gap: 0.125rem;
+    margin-bottom: 0.75rem;
+}
+
+.testimonial-comment {
+    font-size: 0.875rem;
+    color: #4a5568;
+    margin: 0 0 1rem;
+    line-height: 1.5;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.testimonial-actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.edit-btn {
+    flex: 1;
+    padding: 0.5rem;
+    background: #f1f5f9;
+    color: #224570;
+    border: none;
+    border-radius: 8px;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.edit-btn:hover {
+    background: #224570;
+    color: white;
+}
+
+.delete-btn {
+    padding: 0.5rem 1rem;
+    background: #fef2f2;
+    color: #dc2626;
+    border: none;
+    border-radius: 8px;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.delete-btn:hover {
+    background: #dc2626;
+    color: white;
+}
+
+@media (max-width: 768px) {
+    .page-header {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .testimonials-grid {
+        grid-template-columns: 1fr;
+    }
+}
