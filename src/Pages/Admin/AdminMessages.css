@@ -134,6 +134,20 @@
     overflow-y: auto;
 }
 
+/* Mobile back button - hidden on desktop */
+.mobile-back-btn {
+    display: none;
+    padding: 0.5rem 1rem;
+    background: #f1f5f9;
+    color: #475569;
+    border: none;
+    border-radius: 8px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    cursor: pointer;
+    margin-bottom: 1rem;
+}
+
 .detail-header {
     display: flex;
     justify-content: space-between;
@@ -187,6 +201,7 @@
     margin-top: 1.5rem;
     padding-top: 1rem;
     border-top: 1px solid #e5e7eb;
+    flex-wrap: wrap;
 }
 
 .mark-replied-btn {
@@ -253,20 +268,14 @@
     margin: 0;
 }
 
+/* Tablet - single column but still side by side if room */
 @media (max-width: 1024px) {
     .messages-layout {
-        grid-template-columns: 1fr;
-    }
-
-    .message-detail {
-        display: none;
-    }
-
-    .message-item.selected+.message-detail {
-        display: block;
+        grid-template-columns: 1fr 1fr;
     }
 }
 
+/* Mobile - toggle between list and detail */
 @media (max-width: 768px) {
     .page-header {
         flex-direction: column;
@@ -275,5 +284,50 @@
 
     .filter-tabs {
         overflow-x: auto;
+    }
+
+    .filter-tabs button {
+        padding: 0.5rem 0.75rem;
+        font-size: 0.75rem;
+        white-space: nowrap;
+    }
+
+    .messages-layout {
+        grid-template-columns: 1fr;
+    }
+
+    /* Hide detail by default on mobile */
+    .message-detail {
+        display: none;
+    }
+
+    /* When a message is selected, hide list and show detail */
+    .admin-messages-page.detail-open .messages-list {
+        display: none;
+    }
+
+    .admin-messages-page.detail-open .message-detail {
+        display: block;
+    }
+
+    /* Show back button on mobile */
+    .mobile-back-btn {
+        display: block;
+    }
+
+    .detail-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+    }
+
+    .detail-actions {
+        flex-direction: column;
+    }
+
+    .mark-replied-btn,
+    .email-btn {
+        width: 100%;
+        text-align: center;
     }
 }

@@ -36,6 +36,15 @@ const AdminMessages = () => {
         setMessages(messages.map(m => m.id === id ? { ...m, is_read: true, is_replied: true } : m));
     };
 
+    const handleSelectMessage = (id: number, isRead: boolean) => {
+        setSelectedId(id);
+        if (!isRead) handleMarkRead(id);
+    };
+
+    const handleBackToList = () => {
+        setSelectedId(null);
+    };
+
     const selectedMessage = messages.find(m => m.id === selectedId);
     const filteredMessages = messages.filter(m => {
         if (filter === 'unread') return !m.is_read;
@@ -49,7 +58,7 @@ const AdminMessages = () => {
     };
 
     return (
-        <div className="admin-messages-page">
+        <div className={`admin-messages-page ${selectedId ? 'detail-open' : ''}`}>
             <header className="page-header">
                 <h1>{t.messages.title[lang]}</h1>
                 <div className="filter-tabs">
@@ -75,7 +84,11 @@ const AdminMessages = () => {
                         <div className="empty-state"><p>{t.common.noData[lang]}</p></div>
                     ) : (
                         filteredMessages.map((msg) => (
-                            <div key={msg.id} className={`message-item ${selectedId === msg.id ? 'selected' : ''} ${!msg.is_read ? 'unread' : ''}`} onClick={() => { setSelectedId(msg.id!); if (!msg.is_read) handleMarkRead(msg.id!); }}>
+                            <div
+                                key={msg.id}
+                                className={`message-item ${selectedId === msg.id ? 'selected' : ''} ${!msg.is_read ? 'unread' : ''}`}
+                                onClick={() => handleSelectMessage(msg.id!, msg.is_read!)}
+                            >
                                 <div className="message-item-header">
                                     <span className="message-name">{msg.name}</span>
                                     <span className="message-date">{formatDate(msg.created_at)}</span>
@@ -91,6 +104,9 @@ const AdminMessages = () => {
                 <div className="message-detail">
                     {selectedMessage ? (
                         <>
+                            <button className="mobile-back-btn" onClick={handleBackToList}>
+                                ← {lang === 'id' ? 'Kembali' : 'Back'}
+                            </button>
                             <div className="detail-header">
                                 <h2>{selectedMessage.name}</h2>
                                 <span className="detail-date">{formatDate(selectedMessage.created_at)}</span>
