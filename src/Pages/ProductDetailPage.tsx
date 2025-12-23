@@ -108,8 +108,10 @@ const ProductDetailPage: React.FC = () => {
   const [mainImage, setMainImage] = useState('');
   const [showPrimaryDropdown, setShowPrimaryDropdown] = useState(false);
   const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
+  const [needsReadMore, setNeedsReadMore] = useState(false);
 
   const primaryDropdownRef = useRef<HTMLDivElement>(null);
+  const descriptionRef = useRef<HTMLDivElement>(null);
 
   // Listen for language changes
   useEffect(() => {
@@ -190,6 +192,15 @@ const ProductDetailPage: React.FC = () => {
 
     loadProduct();
   }, [slug, navigate]);
+
+  // Check if description needs "Read More" button
+  useEffect(() => {
+    if (descriptionRef.current && product) {
+      // Check if content exceeds max-height (240px = roughly 10 lines)
+      const contentHeight = descriptionRef.current.scrollHeight;
+      setNeedsReadMore(contentHeight > 240);
+    }
+  }, [product, currentLang]);
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -314,22 +325,25 @@ const ProductDetailPage: React.FC = () => {
               {currentLang === 'id' ? 'Etalase' : 'Category'}: <strong>{product.category[currentLang]}</strong>
               <br /><br />
               {product.description[currentLang] && (
-                <div className={`description-container markdown-content ${isDescriptionExpanded ? 'expanded' : 'collapsed'}`}>
+                <div className={`description-container markdown-content ${needsReadMore && !isDescriptionExpanded ? 'collapsed' : 'expanded'}`}>
                   <div
+                    ref={descriptionRef}
                     className="description-text"
                     dangerouslySetInnerHTML={{ __html: parseMarkdown(product.description[currentLang]) }}
                   />
-                  {!isDescriptionExpanded && (
+                  {needsReadMore && !isDescriptionExpanded && (
                     <div className="description-fade"></div>
                   )}
-                  <button
-                    className="read-more-btn"
-                    onClick={() => setIsDescriptionExpanded(!isDescriptionExpanded)}
-                  >
-                    {isDescriptionExpanded
-                      ? (currentLang === 'id' ? 'Sembunyikan' : 'Show Less')
-                      : (currentLang === 'id' ? '... Selengkapnya' : '... Read More')}
-                  </button>
+                  {needsReadMore && (
+                    <button
+                      className="read-more-btn"
+                      onClick={() => setIsDescriptionExpanded(!isDescriptionExpanded)}
+                    >
+                      {isDescriptionExpanded
+                        ? (currentLang === 'id' ? 'Sembunyikan' : 'Show Less')
+                        : (currentLang === 'id' ? '... Selengkapnya' : '... Read More')}
+                    </button>
+                  )}
                 </div>
               )}
             </div>
