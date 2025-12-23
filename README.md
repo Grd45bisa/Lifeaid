@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="public/Logo-trans.webp alt="LifeAid Logo" width="200">
+  <img src="public/Logo-trans.webp" alt="LifeAid Logo" width="200">
 </p>
 
 <h1 align="center">LifeAid - Medical Equipment E-Commerce</h1>
