@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import './styles/Testimonials.css';
+import { isUsingDatabaseProducts, fetchPublicTestimonials, type Testimonial as DbTestimonial } from '../utils/supabaseClient';
 
 // Language type
 type Language = 'id' | 'en';
 
-// Translations
+// Static translations
 const translations = {
   id: {
     badge: 'TESTIMONI',
@@ -67,17 +68,17 @@ const translations = {
 // Detect language
 const detectLanguage = (): Language => {
   if (typeof window === 'undefined') return 'id';
-  
+
   const savedLang = localStorage.getItem('preferred-language') as Language;
   if (savedLang && (savedLang === 'id' || savedLang === 'en')) {
     return savedLang;
   }
-  
+
   const browserLang = navigator.language.toLowerCase();
   if (browserLang.startsWith('id')) {
     return 'id';
   }
-  
+
   return 'en';
 };
 
@@ -89,11 +90,22 @@ interface Testimonial {
   initial: string;
 }
 
+// Map database testimonial to display format
+const mapDbToDisplay = (item: DbTestimonial, lang: Language): Testimonial => ({
+  name: item.name,
+  role: lang === 'id' ? (item.role_id || '') : (item.role_en || ''),
+  rating: item.rating,
+  comment: lang === 'id' ? item.comment_id : item.comment_en,
+  initial: item.name.charAt(0).toUpperCase()
+});
+
 const Testimonials: React.FC = () => {
   const [currentLang, setCurrentLang] = useState<Language>(detectLanguage());
   const [currentIndex, setCurrentIndex] = useState(0);
   const [itemsPerView, setItemsPerView] = useState(3);
   const [isTransitioning, setIsTransitioning] = useState(false);
+  const [dbTestimonials, setDbTestimonials] = useState<DbTestimonial[]>([]);
+  const [useDatabase, setUseDatabase] = useState(false);
 
   // Listen for language changes
   useEffect(() => {
@@ -106,17 +118,38 @@ const Testimonials: React.FC = () => {
 
     checkLanguage();
     window.addEventListener('storage', checkLanguage);
-    
+
     return () => {
       window.removeEventListener('storage', checkLanguage);
     };
   }, [currentLang]);
 
+  // Load testimonials from database if enabled
+  useEffect(() => {
+    const loadTestimonials = async () => {
+      try {
+        const useDb = await isUsingDatabaseProducts();
+        setUseDatabase(useDb);
+        if (useDb) {
+          const data = await fetchPublicTestimonials();
+          setDbTestimonials(data);
+        }
+      } catch (err) {
+        console.error('Error loading testimonials:', err);
+      }
+    };
+    loadTestimonials();
+  }, []);
+
   const t = translations[currentLang];
-  const testimonials: Testimonial[] = t.testimonials.map(item => ({
-    ...item,
-    rating: 5
-  }));
+
+  // Get testimonials based on source
+  const testimonials: Testimonial[] = useDatabase && dbTestimonials.length > 0
+    ? dbTestimonials.map(item => mapDbToDisplay(item, currentLang))
+    : t.testimonials.map(item => ({
+      ...item,
+      rating: 5
+    }));
 
   // Handle responsive items per view
   useEffect(() => {
@@ -135,14 +168,14 @@ const Testimonials: React.FC = () => {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
+  const maxIndex = Math.max(0, testimonials.length - itemsPerView);
+
   // Reset index when items per view changes
   useEffect(() => {
     if (currentIndex > maxIndex) {
       setCurrentIndex(maxIndex);
     }
-  }, [itemsPerView]);
-
-  const maxIndex = Math.max(0, testimonials.length - itemsPerView);
+  }, [itemsPerView, maxIndex, currentIndex]);
 
   const handlePrev = () => {
     if (isTransitioning) return;
@@ -215,7 +248,7 @@ const Testimonials: React.FC = () => {
 
           {/* Testimonials Track */}
           <div className="testimonials-track-container">
-            <div 
+            <div
               className="testimonials-track"
               style={{
                 transform: `translateX(${translateValue}%)`,
@@ -223,8 +256,8 @@ const Testimonials: React.FC = () => {
               }}
             >
               {testimonials.map((testimonial, index) => (
-                <div 
-                  key={index} 
+                <div
+                  key={index}
                   className="testimonial-card"
                   style={{ width: `${100 / itemsPerView}%` }}
                 >

@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { useAdminLanguage, adminTranslations as t } from './AdminLanguageContext';
+import { signOut } from '../../utils/supabaseClient';
 import './AdminSidebar.css';
 
 // Icons as SVG components
@@ -61,6 +62,13 @@ const FeaturedIcon = () => (
     </svg>
 );
 
+const ProfileIcon = () => (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+        <circle cx="12" cy="7" r="4" />
+    </svg>
+);
+
 const MenuIcon = () => (
     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
         <line x1="3" y1="12" x2="21" y2="12" />
@@ -81,8 +89,13 @@ const AdminSidebar = () => {
     const { lang, setLang } = useAdminLanguage();
     const [isMobileOpen, setIsMobileOpen] = useState(false);
 
-    const handleLogout = () => {
-        localStorage.removeItem('isAdminLoggedIn');
+    const handleLogout = async () => {
+        try {
+            await signOut();
+        } catch (err) {
+            console.error('Logout error:', err);
+        }
+        localStorage.removeItem('adminUser');
         navigate('/admin/login');
     };
 
@@ -228,6 +241,16 @@ const AdminSidebar = () => {
                                 >
                                     <SettingsIcon />
                                     <span>{t.sidebar.settings[lang]}</span>
+                                </NavLink>
+                            </li>
+                            <li>
+                                <NavLink
+                                    to="/admin/profile"
+                                    className={({ isActive }) => isActive ? 'active' : ''}
+                                    onClick={closeMobileMenu}
+                                >
+                                    <ProfileIcon />
+                                    <span>{lang === 'id' ? 'Profil' : 'Profile'}</span>
                                 </NavLink>
                             </li>
                         </ul>

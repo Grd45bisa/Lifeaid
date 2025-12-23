@@ -255,6 +255,18 @@ export const fetchTestimonials = async (): Promise<Testimonial[]> => {
     return data || [];
 };
 
+// Fetch only active testimonials for public display
+export const fetchPublicTestimonials = async (): Promise<Testimonial[]> => {
+    const { data, error } = await supabase
+        .from('testimonials')
+        .select('*')
+        .eq('is_active', true)
+        .order('sort_order', { ascending: true });
+
+    if (error) throw error;
+    return data || [];
+};
+
 export const createTestimonial = async (testimonial: Omit<Testimonial, 'id' | 'created_at'>): Promise<Testimonial> => {
     const { data, error } = await supabase
         .from('testimonials')
@@ -563,5 +575,102 @@ export const updateFeaturedProduct = async (content: FeaturedProductContent): Pr
         console.error('Error updating featured product content');
         return false;
     }
+};
+
+// ============================================
+// SUPABASE AUTHENTICATION
+// ============================================
+
+export interface AdminProfile {
+    id: string;
+    email: string;
+    display_name?: string;
+    role?: string;
+}
+
+// Sign in with email and password
+export const signInWithEmail = async (email: string, password: string) => {
+    const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password
+    });
+
+    if (error) throw error;
+    return data;
+};
+
+// Sign out
+export const signOut = async () => {
+    const { error } = await supabase.auth.signOut();
+    if (error) throw error;
+};
+
+// Get current session
+export const getSession = async () => {
+    const { data: { session }, error } = await supabase.auth.getSession();
+    if (error) throw error;
+    return session;
+};
+
+// Get current user
+export const getCurrentUser = async (): Promise<AdminProfile | null> => {
+    const { data: { user }, error } = await supabase.auth.getUser();
+    if (error || !user) return null;
+
+    // Try to get profile from admin_profiles table
+    const { data: profile } = await supabase
+        .from('admin_profiles')
+        .select('display_name, role')
+        .eq('id', user.id)
+        .single();
+
+    return {
+        id: user.id,
+        email: user.email || '',
+        display_name: profile?.display_name || user.email?.split('@')[0] || 'Admin',
+        role: profile?.role || 'admin'
+    };
+};
+
+// Update user email
+export const updateUserEmail = async (newEmail: string) => {
+    const { data, error } = await supabase.auth.updateUser({
+        email: newEmail
+    });
+
+    if (error) throw error;
+    return data;
+};
+
+// Update user password
+export const updateUserPassword = async (newPassword: string) => {
+    const { data, error } = await supabase.auth.updateUser({
+        password: newPassword
+    });
+
+    if (error) throw error;
+    return data;
+};
+
+// Update admin profile (display name)
+export const updateAdminProfile = async (displayName: string) => {
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    if (authError || !user) throw new Error('Not authenticated');
+
+    const { error } = await supabase
+        .from('admin_profiles')
+        .upsert({
+            id: user.id,
+            display_name: displayName
+        }, { onConflict: 'id' });
+
+    if (error) throw error;
+};
+
+// Listen for auth state changes
+export const onAuthStateChange = (callback: (session: unknown) => void) => {
+    return supabase.auth.onAuthStateChange((_event, session) => {
+        callback(session);
+    });
 };
 
