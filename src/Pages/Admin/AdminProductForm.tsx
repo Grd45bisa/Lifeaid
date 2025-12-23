@@ -11,6 +11,8 @@ const ListIcon = () => <svg width="16" height="16" viewBox="0 0 24 24" fill="cur
 const HeadingIcon = () => <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M5 4v3h5.5v12h3V7H19V4z" /></svg>;
 const LinkIcon = () => <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z" /></svg>;
 
+const MAX_IMAGES = 5;
+
 const AdminProductForm = () => {
     const { lang } = useAdminLanguage();
     const navigate = useNavigate();
@@ -22,10 +24,13 @@ const AdminProductForm = () => {
     const [isLoading, setIsLoading] = useState(false);
     const [isSaving, setIsSaving] = useState(false);
     const [activeTab, setActiveTab] = useState<'id' | 'en'>('id');
+
+    // Images array - first image is the main image
+    const [images, setImages] = useState<string[]>([]);
+    const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
+
     const [formData, setFormData] = useState({
         slug: '',
-        image_base64: '',
-        thumbnails_base64: [] as string[],
         title_id: '',
         title_en: '',
         price: '',
@@ -54,10 +59,18 @@ const AdminProductForm = () => {
         try {
             const product = await fetchProductById(productId);
             if (product) {
+                // Combine main image and thumbnails into single array
+                const allImages: string[] = [];
+                if (product.image_base64) {
+                    allImages.push(product.image_base64);
+                }
+                if (product.thumbnails_base64 && product.thumbnails_base64.length > 0) {
+                    allImages.push(...product.thumbnails_base64.filter(img => img !== product.image_base64));
+                }
+                setImages(allImages);
+
                 setFormData({
                     slug: product.slug,
-                    image_base64: product.image_base64,
-                    thumbnails_base64: product.thumbnails_base64 || [],
                     title_id: product.title_id,
                     title_en: product.title_en,
                     price: product.price,
@@ -96,23 +109,73 @@ const AdminProductForm = () => {
             setFormData(prev => ({ ...prev, slug }));
         }
 
-        // Auto-parse price to numeric
+        // Auto-format and parse price to Rupiah format
         if (field === 'price') {
+            // Extract only numbers
             const numericValue = parseInt((value as string).replace(/\D/g, '')) || 0;
-            setFormData(prev => ({ ...prev, price_numeric: numericValue }));
+
+            // Format to Rupiah: Rp 1.000.000
+            const formatted = numericValue > 0
+                ? 'Rp ' + numericValue.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.')
+                : '';
+
+            setFormData(prev => ({
+                ...prev,
+                price: formatted,
+                price_numeric: numericValue
+            }));
         }
     };
 
-    // Image to Base64
-    const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files?.[0];
-        if (!file) return;
+    // Handle multiple image upload
+    const handleImagesUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const files = e.target.files;
+        if (!files) return;
 
-        const reader = new FileReader();
-        reader.onloadend = () => {
-            setFormData(prev => ({ ...prev, image_base64: reader.result as string }));
-        };
-        reader.readAsDataURL(file);
+        const remainingSlots = MAX_IMAGES - images.length;
+        const filesToProcess = Array.from(files).slice(0, remainingSlots);
+
+        filesToProcess.forEach(file => {
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                setImages(prev => {
+                    if (prev.length >= MAX_IMAGES) return prev;
+                    return [...prev, reader.result as string];
+                });
+            };
+            reader.readAsDataURL(file);
+        });
+
+        // Reset input
+        e.target.value = '';
+    };
+
+    // Remove image
+    const handleRemoveImage = (index: number) => {
+        setImages(prev => prev.filter((_, i) => i !== index));
+    };
+
+    // Drag and drop handlers
+    const handleDragStart = (index: number) => {
+        setDraggedIndex(index);
+    };
+
+    const handleDragOver = (e: React.DragEvent, index: number) => {
+        e.preventDefault();
+        if (draggedIndex === null || draggedIndex === index) return;
+
+        // Reorder images
+        setImages(prev => {
+            const newImages = [...prev];
+            const [draggedItem] = newImages.splice(draggedIndex, 1);
+            newImages.splice(index, 0, draggedItem);
+            return newImages;
+        });
+        setDraggedIndex(index);
+    };
+
+    const handleDragEnd = () => {
+        setDraggedIndex(null);
     };
 
     // Markdown toolbar actions
@@ -155,17 +218,24 @@ const AdminProductForm = () => {
             alert(lang === 'id' ? 'Nama produk harus diisi' : 'Product name is required');
             return;
         }
-        if (!formData.image_base64) {
-            alert(lang === 'id' ? 'Gambar produk harus diupload' : 'Product image is required');
+        if (images.length === 0) {
+            alert(lang === 'id' ? 'Minimal 1 gambar produk harus diupload' : 'At least 1 product image is required');
             return;
         }
+
+        // Prepare data - first image is main, rest are thumbnails
+        const productData = {
+            ...formData,
+            image_base64: images[0],
+            thumbnails_base64: images
+        };
 
         setIsSaving(true);
         try {
             if (isEdit && id) {
-                await updateProduct(parseInt(id), formData);
+                await updateProduct(parseInt(id), productData);
             } else {
-                await createProduct(formData);
+                await createProduct(productData);
             }
             navigate('/admin/products');
         } catch (err) {
@@ -195,19 +265,57 @@ const AdminProductForm = () => {
             </header>
 
             <form onSubmit={handleSubmit} className="product-form">
-                {/* Image Upload */}
+                {/* Multi-Image Upload */}
                 <div className="form-section">
-                    <h2>{t.products.image[lang]}</h2>
-                    <div className="image-upload-area">
-                        {formData.image_base64 ? (
-                            <div className="image-preview">
-                                <img src={formData.image_base64} alt="Preview" />
-                                <button type="button" onClick={() => handleChange('image_base64', '')}>✕</button>
+                    <h2>
+                        {t.products.image[lang]}
+                        <span className="image-count">({images.length}/{MAX_IMAGES})</span>
+                    </h2>
+                    <p className="image-hint">
+                        {lang === 'id'
+                            ? 'Drag untuk mengatur urutan. Foto pertama akan menjadi foto utama.'
+                            : 'Drag to reorder. First photo will be the main image.'}
+                    </p>
+
+                    <div className="image-gallery">
+                        {images.map((img, index) => (
+                            <div
+                                key={index}
+                                className={`gallery-item ${index === 0 ? 'main-image' : ''} ${draggedIndex === index ? 'dragging' : ''}`}
+                                draggable
+                                onDragStart={() => handleDragStart(index)}
+                                onDragOver={(e) => handleDragOver(e, index)}
+                                onDragEnd={handleDragEnd}
+                            >
+                                <img src={img} alt={`Product ${index + 1}`} />
+                                {index === 0 && (
+                                    <span className="main-badge">
+                                        {lang === 'id' ? 'Utama' : 'Main'}
+                                    </span>
+                                )}
+                                <button
+                                    type="button"
+                                    className="remove-btn"
+                                    onClick={() => handleRemoveImage(index)}
+                                >
+                                    ✕
+                                </button>
+                                <span className="drag-hint">⋮⋮</span>
                             </div>
-                        ) : (
-                            <label className="upload-label">
-                                <input type="file" accept="image/*" onChange={handleImageUpload} />
-                                <span>{t.products.uploadImage[lang]}</span>
+                        ))}
+
+                        {images.length < MAX_IMAGES && (
+                            <label className="upload-slot">
+                                <input
+                                    type="file"
+                                    accept="image/*"
+                                    multiple
+                                    onChange={handleImagesUpload}
+                                />
+                                <span className="plus-icon">+</span>
+                                <span className="upload-text">
+                                    {lang === 'id' ? 'Tambah Foto' : 'Add Photo'}
+                                </span>
                             </label>
                         )}
                     </div>

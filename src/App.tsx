@@ -23,6 +23,7 @@ const AdminTestimonials = lazy(() => import('./Pages/Admin/AdminTestimonials'));
 const AdminTestimonialForm = lazy(() => import('./Pages/Admin/AdminTestimonialForm'));
 const AdminMessages = lazy(() => import('./Pages/Admin/AdminMessages'));
 const AdminSettings = lazy(() => import('./Pages/Admin/AdminSettings'));
+const AdminFeaturedProduct = lazy(() => import('./Pages/Admin/AdminFeaturedProduct'));
 
 // Loading component
 const LoadingFallback = () => (
@@ -100,6 +101,7 @@ function App() {
             <Route path="testimonials/edit/:id" element={<AdminTestimonialForm />} />
             <Route path="messages" element={<AdminMessages />} />
             <Route path="settings" element={<AdminSettings />} />
+            <Route path="featured-product" element={<AdminFeaturedProduct />} />
           </Route>
         </Routes>
       ) : (

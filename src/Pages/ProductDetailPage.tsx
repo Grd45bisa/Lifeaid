@@ -1,12 +1,69 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { getProductBySlug } from '../data/productData';
+import { getProductBySlug, type Product as StaticProduct } from '../data/productData';
+import { isUsingDatabaseProducts, fetchProductBySlug as fetchDbProduct, type PublicProduct } from '../utils/supabaseClient';
+import { parseMarkdown } from '../utils/markdownParser';
 import './styles/ProductDetailPage.css';
 import Accessories from '../Components/Accessories';
 import WhatsAppBubbleChat from '../Components/WhatsAppBubbleChat';
 
 // Language type
 type Language = 'id' | 'en';
+
+// Unified product interface for display
+interface DisplayProduct {
+  slug: string;
+  img: string;
+  thumbnails: string[];
+  title: { id: string; en: string };
+  price: string;
+  priceNumeric: number;
+  description: { id: string; en: string };
+  condition: { id: string; en: string };
+  minOrder: { id: string; en: string };
+  category: { id: string; en: string };
+}
+
+// Format number to Rupiah
+const formatToRupiah = (num: number): string => {
+  if (!num || num === 0) return 'Rp 0';
+  return 'Rp ' + num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+};
+
+// Map database product to display format
+const mapDbToDisplay = (p: PublicProduct): DisplayProduct => {
+  // Use formatted price if it already starts with "Rp", otherwise format from numeric
+  const displayPrice = p.price && p.price.startsWith('Rp')
+    ? p.price
+    : formatToRupiah(p.price_numeric);
+
+  return {
+    slug: p.slug,
+    img: p.image_base64 || '/Product1.webp',
+    thumbnails: p.thumbnails_base64?.length ? p.thumbnails_base64 : [p.image_base64 || '/Product1.webp'],
+    title: { id: p.title_id, en: p.title_en },
+    price: displayPrice,
+    priceNumeric: p.price_numeric,
+    description: { id: p.description_id || '', en: p.description_en || '' },
+    condition: { id: p.condition_id || 'Baru', en: p.condition_en || 'New' },
+    minOrder: { id: p.min_order_id || '1 Buah', en: p.min_order_en || '1 Unit' },
+    category: { id: p.category_id, en: p.category_en },
+  };
+};
+
+// Map static product to display format
+const mapStaticToDisplay = (p: StaticProduct): DisplayProduct => ({
+  slug: p.slug,
+  img: p.img,
+  thumbnails: p.thumbnails,
+  title: p.title,
+  price: p.price,
+  priceNumeric: p.priceNumeric,
+  description: p.description,
+  condition: p.condition,
+  minOrder: p.minOrder,
+  category: p.category,
+});
 
 // Detect language
 const detectLanguage = (): Language => {
@@ -43,14 +100,14 @@ const ProductDetailPage: React.FC = () => {
   const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
 
-  // Get product data
-  const product = getProductBySlug(slug || '');
-
   const [currentLang, setCurrentLang] = useState<Language>(detectLanguage());
+  const [product, setProduct] = useState<DisplayProduct | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<'detail'>('detail');
   const [activeThumbnail, setActiveThumbnail] = useState(0);
-  const [mainImage, setMainImage] = useState(product?.img || '');
+  const [mainImage, setMainImage] = useState('');
   const [showPrimaryDropdown, setShowPrimaryDropdown] = useState(false);
+  const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
 
   const primaryDropdownRef = useRef<HTMLDivElement>(null);
 
@@ -71,19 +128,68 @@ const ProductDetailPage: React.FC = () => {
     };
   }, [currentLang]);
 
-  // Set initial main image
+  // Load product based on settings
   useEffect(() => {
-    if (product) {
-      setMainImage(product.img);
-    }
-  }, [product]);
+    const loadProduct = async () => {
+      if (!slug) {
+        navigate('/');
+        return;
+      }
 
-  // Redirect if product not found
-  useEffect(() => {
-    if (!product) {
-      navigate('/');
-    }
-  }, [product, navigate]);
+      setIsLoading(true);
+      try {
+        const useDatabase = await isUsingDatabaseProducts();
+        console.log('[ProductDetail] useDatabase:', useDatabase, 'slug:', slug);
+
+        if (useDatabase) {
+          // Try to fetch from database
+          const dbProduct = await fetchDbProduct(slug);
+          console.log('[ProductDetail] dbProduct:', dbProduct);
+
+          if (dbProduct) {
+            const displayProduct = mapDbToDisplay(dbProduct);
+            setProduct(displayProduct);
+            setMainImage(displayProduct.img);
+          } else {
+            // Not found in DB, try static data
+            const staticProduct = getProductBySlug(slug);
+            if (staticProduct) {
+              const displayProduct = mapStaticToDisplay(staticProduct);
+              setProduct(displayProduct);
+              setMainImage(displayProduct.img);
+            } else {
+              navigate('/');
+            }
+          }
+        } else {
+          // Database mode disabled, use static data
+          const staticProduct = getProductBySlug(slug);
+          if (staticProduct) {
+            const displayProduct = mapStaticToDisplay(staticProduct);
+            setProduct(displayProduct);
+            setMainImage(displayProduct.img);
+          } else {
+            navigate('/');
+          }
+        }
+      } catch {
+        console.error('[ProductDetail] Error loading product');
+        // Fallback to static on error
+        const staticProduct = getProductBySlug(slug || '');
+        if (staticProduct) {
+          const displayProduct = mapStaticToDisplay(staticProduct);
+          setProduct(displayProduct);
+          setMainImage(displayProduct.img);
+        } else {
+          navigate('/');
+        }
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadProduct();
+  }, [slug, navigate]);
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -98,6 +204,16 @@ const ProductDetailPage: React.FC = () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
   }, []);
+
+  if (isLoading) {
+    return (
+      <section className="product-detail-page">
+        <div className="page-container" style={{ justifyContent: 'center', alignItems: 'center', minHeight: '50vh' }}>
+          <p>{currentLang === 'id' ? 'Memuat produk...' : 'Loading product...'}</p>
+        </div>
+      </section>
+    );
+  }
 
   if (!product) {
     return null;
@@ -135,13 +251,11 @@ const ProductDetailPage: React.FC = () => {
   };
 
   const handleBuyShopee = () => {
-    // Replace with actual Shopee link
     window.open('https://shopee.co.id/Lifeaid', '_blank');
     setShowPrimaryDropdown(false);
   };
 
   const handleBuyTokopedia = () => {
-    // Replace with actual Tokopedia link
     window.open('https://www.tokopedia.com/lifeaid', '_blank');
     setShowPrimaryDropdown(false);
   };
@@ -200,11 +314,22 @@ const ProductDetailPage: React.FC = () => {
               {currentLang === 'id' ? 'Etalase' : 'Category'}: <strong>{product.category[currentLang]}</strong>
               <br /><br />
               {product.description[currentLang] && (
-                <div className="description-container">
+                <div className={`description-container markdown-content ${isDescriptionExpanded ? 'expanded' : 'collapsed'}`}>
                   <div
                     className="description-text"
-                    dangerouslySetInnerHTML={{ __html: product.description[currentLang].replace(/\n/g, '<br/>') }}
+                    dangerouslySetInnerHTML={{ __html: parseMarkdown(product.description[currentLang]) }}
                   />
+                  {!isDescriptionExpanded && (
+                    <div className="description-fade"></div>
+                  )}
+                  <button
+                    className="read-more-btn"
+                    onClick={() => setIsDescriptionExpanded(!isDescriptionExpanded)}
+                  >
+                    {isDescriptionExpanded
+                      ? (currentLang === 'id' ? 'Sembunyikan' : 'Show Less')
+                      : (currentLang === 'id' ? '... Selengkapnya' : '... Read More')}
+                  </button>
                 </div>
               )}
             </div>

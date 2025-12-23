@@ -2,37 +2,20 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './styles/Product.css';
 import Accessories from './Accessories';
+import { isUsingDatabaseProducts, fetchFeaturedProduct, type FeaturedProductContent, defaultFeaturedProduct } from '../utils/supabaseClient';
 
 // Language type
 type Language = 'id' | 'en';
 
-// Translations
-const translations = {
+// Static translations for buy buttons
+const buttonTranslations = {
   id: {
-    badge: 'PRODUK UNGGULAN',
-    title: 'Koleksi Alat Bantu Mobilitas Terlengkap',
-    subtitle: 'Temukan alat angkat pasien elektrik terpercaya untuk transfer pasien yang aman, nyaman, dan mudah. LifeAidStore menghadirkan solusi mobilitas modern dengan konsultasi ahli dan harga terjangkau untuk perawatan rumah yang lebih aman.',
-    productTitle: 'Electric Patient Lifter, alat untuk membantu mengangkat pasien stroke.',
-    productDesc: 'Pengangkat Pasien Listrik adalah alat bantu angkat bertenaga baterai yang dirancang untuk memindahkan pasien stroke, lumpuh, atau yang memiliki gangguan mobilitas dengan aman dan mudah.',
-    mainFunctionTitle: 'Fungsi Utama:',
-    mainFunctionDesc: 'Memindahkan pasien dari tempat tidur ke kursi roda, mobil, atau bak mandi untuk kebutuhan sehari-hari.',
-    suitableForTitle: 'Cocok Untuk:',
-    suitableForDesc: 'Lansia, pengguna kursi roda, penyandang disabilitas, dan pasien yang terbaring di tempat tidur atau mengalami patah tulang.',
     buyNow: 'Beli sekarang',
     buyOnWebsite: 'Lihat Selengkapnya',
     tokopedia: 'Beli di Tokopedia',
     shopee: 'Beli di Shopee'
   },
   en: {
-    badge: 'FEATURED PRODUCTS',
-    title: 'Complete Collection of Mobility Aids',
-    subtitle: 'Find trusted electric patient lifts for safe, comfortable, and easy patient transfers. LifeAidStore presents modern mobility solutions with expert consultation and affordable prices for safer home care.',
-    productTitle: 'Electric Patient Lifter, tool to help lift stroke patients.',
-    productDesc: 'Electric Patient Lifter is a battery-powered lifting aid designed to move stroke patients, paralyzed, or those with mobility impairments safely and easily.',
-    mainFunctionTitle: 'Main Function:',
-    mainFunctionDesc: 'Move patients from bed to wheelchair, car, or bathtub for daily needs.',
-    suitableForTitle: 'Suitable For:',
-    suitableForDesc: 'Elderly, wheelchair users, people with disabilities, and bedridden patients or those with broken bones.',
     buyNow: 'Buy now',
     buyOnWebsite: 'See More',
     tokopedia: 'Buy on Tokopedia',
@@ -61,6 +44,7 @@ const Product: React.FC = () => {
   const navigate = useNavigate();
   const [currentLang, setCurrentLang] = useState<Language>(detectLanguage());
   const [showDropdown, setShowDropdown] = useState(false);
+  const [content, setContent] = useState<FeaturedProductContent>(defaultFeaturedProduct);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   // Listen for language changes
@@ -80,7 +64,23 @@ const Product: React.FC = () => {
     };
   }, [currentLang]);
 
-  // Close dropdown when clicking outside - Handles both Mouse and Touch events
+  // Load content from database if enabled
+  useEffect(() => {
+    const loadContent = async () => {
+      try {
+        const useDb = await isUsingDatabaseProducts();
+        if (useDb) {
+          const dbContent = await fetchFeaturedProduct();
+          setContent(dbContent);
+        }
+      } catch (err) {
+        console.error('Error loading featured product:', err);
+      }
+    };
+    loadContent();
+  }, []);
+
+  // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent | TouchEvent) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
@@ -97,7 +97,7 @@ const Product: React.FC = () => {
     };
   }, []);
 
-  // Handle button click for both mouse and touch
+  // Handle button click
   const handleButtonClick = (e: React.MouseEvent<HTMLButtonElement> | React.TouchEvent<HTMLButtonElement>) => {
     e.preventDefault();
     e.stopPropagation();
@@ -111,21 +111,33 @@ const Product: React.FC = () => {
     navigate('/product/electric-patient-lifter');
   };
 
-  const t = translations[currentLang];
+  const t = buttonTranslations[currentLang];
+
+  // Get content based on language
+  const badge = currentLang === 'id' ? content.badge_id : content.badge_en;
+  const title = currentLang === 'id' ? content.title_id : content.title_en;
+  const subtitle = currentLang === 'id' ? content.subtitle_id : content.subtitle_en;
+  const productTitle = currentLang === 'id' ? content.product_title_id : content.product_title_en;
+  const productDesc = currentLang === 'id' ? content.product_desc_id : content.product_desc_en;
+  const mainFunctionTitle = currentLang === 'id' ? content.main_function_title_id : content.main_function_title_en;
+  const mainFunctionDesc = currentLang === 'id' ? content.main_function_desc_id : content.main_function_desc_en;
+  const suitableForTitle = currentLang === 'id' ? content.suitable_for_title_id : content.suitable_for_title_en;
+  const suitableForDesc = currentLang === 'id' ? content.suitable_for_desc_id : content.suitable_for_desc_en;
+  const productImage = content.image_base64 || '/Product.webp';
 
   return (
     <>
       <section className="product" id="product">
         <div className="product-header">
-          <p className="product-badge">{t.badge}</p>
-          <h2 className="product-title">{t.title}</h2>
-          <p className="product-subtitle">{t.subtitle}</p>
+          <p className="product-badge">{badge}</p>
+          <h2 className="product-title">{title}</h2>
+          <p className="product-subtitle">{subtitle}</p>
         </div>
 
         <div className="product-container">
           <div className="product-image">
             <img
-              src="/Product.webp"
+              src={productImage}
               alt={currentLang === 'id'
                 ? 'Electric Patient Lifter LifeAid'
                 : 'Electric Patient Lifter LifeAid'}
@@ -135,24 +147,24 @@ const Product: React.FC = () => {
           </div>
 
           <div className="product-content">
-            <h3 className="product-content-title">{t.productTitle}</h3>
+            <h3 className="product-content-title">{productTitle}</h3>
 
             <p className="product-text">
               <strong>
                 {currentLang === 'id' ? 'Pengangkat Pasien Listrik' : 'Electric Patient Lifter'}
               </strong>{' '}
-              {t.productDesc}
+              {productDesc}
             </p>
 
             <div className="product-features">
               <div className="feature-item">
-                <h4 className="feature-title">{t.mainFunctionTitle}</h4>
-                <p className="feature-text">{t.mainFunctionDesc}</p>
+                <h4 className="feature-title">{mainFunctionTitle}</h4>
+                <p className="feature-text">{mainFunctionDesc}</p>
               </div>
 
               <div className="feature-item">
-                <h4 className="feature-title">{t.suitableForTitle}</h4>
-                <p className="feature-text">{t.suitableForDesc}</p>
+                <h4 className="feature-title">{suitableForTitle}</h4>
+                <p className="feature-text">{suitableForDesc}</p>
               </div>
             </div>
 

@@ -341,6 +341,105 @@
     color: #ffffff;
 }
 
+/* === MARKDOWN CONTENT STYLES === */
+.markdown-content .description-text {
+    line-height: 1.6;
+}
+
+.markdown-content .md-heading {
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: #224570;
+    margin: 0.75rem 0 0.5rem 0;
+}
+
+.markdown-content .md-subheading {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: #374151;
+    margin: 0.5rem 0 0.35rem 0;
+}
+
+.markdown-content .md-list {
+    margin: 0.5rem 0;
+    padding-left: 0;
+    list-style: none;
+}
+
+.markdown-content .md-list li {
+    position: relative;
+    padding-left: 1rem;
+    margin-bottom: 0.25rem;
+    line-height: 1.5;
+}
+
+.markdown-content .md-list li::before {
+    content: "•";
+    position: absolute;
+    left: 0;
+    color: #224570;
+    font-weight: bold;
+}
+
+.markdown-content a {
+    color: #224570;
+    text-decoration: underline;
+}
+
+.markdown-content a:hover {
+    color: #1a3555;
+}
+
+.markdown-content strong {
+    font-weight: 600;
+    color: #1e293b;
+}
+
+.markdown-content em {
+    font-style: italic;
+}
+
+/* Description Collapse/Expand */
+.description-container {
+    position: relative;
+}
+
+.description-container.collapsed .description-text {
+    max-height: 240px;
+    overflow: hidden;
+}
+
+.description-container.expanded .description-text {
+    max-height: none;
+}
+
+.description-fade {
+    position: absolute;
+    bottom: 30px;
+    left: 0;
+    right: 0;
+    height: 60px;
+    background: linear-gradient(to bottom, transparent, #ffffff);
+    pointer-events: none;
+}
+
+.read-more-btn {
+    display: block;
+    background: none;
+    border: none;
+    color: #224570;
+    font-weight: 600;
+    font-size: 0.9rem;
+    cursor: pointer;
+    padding: 0.5rem 0;
+    margin-top: 0.25rem;
+}
+
+.read-more-btn:hover {
+    color: #1a3555;
+    text-decoration: underline;
+}
+
 /* === RESPONSIVE === */
 @media (max-width: 1024px) {
     .page-container {

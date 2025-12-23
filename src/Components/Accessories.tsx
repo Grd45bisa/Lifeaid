@@ -1,15 +1,26 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { isUsingDatabaseProducts, fetchPublicProducts, type PublicProduct } from '../utils/supabaseClient';
 import './styles/Accessories.css';
 
 // Language type
 type Language = 'id' | 'en';
+
+// Item type for display
+interface AccessoryItem {
+  id: number;
+  slug: string;
+  img: string;
+  title: string;
+  price: string;
+}
 
 // Translations
 const translations = {
   id: {
     title: 'Koleksi Aksesori Lift Pasien Elektrik',
     viewDetails: 'Lihat Detail',
+    loading: 'Memuat produk...',
     products: {
       product1: 'Standard Patient Lift Sling',
       product2: 'Premium Electric Lift Sling',
@@ -20,6 +31,7 @@ const translations = {
   en: {
     title: 'Electric Patient Lift Accessories Collection',
     viewDetails: 'View Details',
+    loading: 'Loading products...',
     products: {
       product1: 'Standard Patient Lift Sling',
       product2: 'Premium Electric Lift Sling',
@@ -29,47 +41,10 @@ const translations = {
   }
 };
 
-// Detect language
-const detectLanguage = (): Language => {
-  if (typeof window === 'undefined') return 'id';
-
-  const savedLang = localStorage.getItem('preferred-language') as Language;
-  if (savedLang && (savedLang === 'id' || savedLang === 'en')) {
-    return savedLang;
-  }
-
-  const browserLang = navigator.language.toLowerCase();
-  if (browserLang.startsWith('id')) {
-    return 'id';
-  }
-
-  return 'en';
-};
-
-const Accessories: React.FC = () => {
-  const navigate = useNavigate();
-  const [currentLang, setCurrentLang] = useState<Language>(detectLanguage());
-
-  // Listen for language changes
-  useEffect(() => {
-    const checkLanguage = () => {
-      const lang = detectLanguage();
-      if (lang !== currentLang) {
-        setCurrentLang(lang);
-      }
-    };
-
-    checkLanguage();
-    window.addEventListener('storage', checkLanguage);
-
-    return () => {
-      window.removeEventListener('storage', checkLanguage);
-    };
-  }, [currentLang]);
-
-  const t = translations[currentLang];
-
-  const items = [
+// Default static items (fallback when database is disabled or fails)
+const getDefaultItems = (lang: Language): AccessoryItem[] => {
+  const t = translations[lang];
+  return [
     {
       id: 1,
       slug: 'standard-patient-lift-sling',
@@ -99,6 +74,125 @@ const Accessories: React.FC = () => {
       price: 'Rp 2.200.000,00',
     },
   ];
+};
+
+// Detect language
+const detectLanguage = (): Language => {
+  if (typeof window === 'undefined') return 'id';
+
+  const savedLang = localStorage.getItem('preferred-language') as Language;
+  if (savedLang && (savedLang === 'id' || savedLang === 'en')) {
+    return savedLang;
+  }
+
+  const browserLang = navigator.language.toLowerCase();
+  if (browserLang.startsWith('id')) {
+    return 'id';
+  }
+
+  return 'en';
+};
+
+// Format number to Rupiah
+const formatToRupiah = (num: number): string => {
+  if (!num || num === 0) return 'Rp 0';
+  return 'Rp ' + num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+};
+
+// Map database product to AccessoryItem format
+const mapDatabaseProduct = (product: PublicProduct, lang: Language): AccessoryItem => {
+  // Use formatted price if it already starts with "Rp", otherwise format from numeric
+  const displayPrice = product.price && product.price.startsWith('Rp')
+    ? product.price
+    : formatToRupiah(product.price_numeric);
+
+  return {
+    id: product.id,
+    slug: product.slug,
+    img: product.image_base64 || '/Product1.webp',
+    title: lang === 'id' ? product.title_id : product.title_en,
+    price: displayPrice,
+  };
+};
+
+const Accessories: React.FC = () => {
+  const navigate = useNavigate();
+  const [currentLang, setCurrentLang] = useState<Language>(detectLanguage());
+  const [items, setItems] = useState<AccessoryItem[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Listen for language changes
+  useEffect(() => {
+    const checkLanguage = () => {
+      const lang = detectLanguage();
+      if (lang !== currentLang) {
+        setCurrentLang(lang);
+      }
+    };
+
+    checkLanguage();
+    window.addEventListener('storage', checkLanguage);
+
+    return () => {
+      window.removeEventListener('storage', checkLanguage);
+    };
+  }, [currentLang]);
+
+  // Load products based on settings
+  useEffect(() => {
+    const loadProducts = async () => {
+      setIsLoading(true);
+      try {
+        const useDatabase = await isUsingDatabaseProducts();
+        console.log('[Accessories] useDatabase setting:', useDatabase);
+
+        if (useDatabase) {
+          // Fetch from database
+          const dbProducts = await fetchPublicProducts();
+          console.log('[Accessories] dbProducts fetched:', dbProducts.length, dbProducts);
+
+          if (dbProducts.length > 0) {
+            // Filter for accessories category (exclude main Electric Patient Lifter)
+            // Accessories typically have category containing "Aksesori" or "Accessories"
+            const accessories = dbProducts.filter(p => {
+              const categoryId = p.category_id.toLowerCase();
+              const categoryEn = p.category_en.toLowerCase();
+              return categoryId.includes('aksesori') ||
+                categoryEn.includes('accessories') ||
+                categoryId.includes('baterai') ||
+                categoryEn.includes('battery');
+            });
+            console.log('[Accessories] filtered accessories:', accessories.length, accessories);
+
+            // If we have accessories, use them; otherwise use all products
+            const productsToShow = accessories.length > 0 ? accessories : dbProducts;
+            console.log('[Accessories] productsToShow:', productsToShow.length);
+            setItems(productsToShow.map(p => mapDatabaseProduct(p, currentLang)));
+          } else {
+            // No products in database, use fallback
+            console.log('[Accessories] No products in DB, using fallback');
+            setItems(getDefaultItems(currentLang));
+          }
+        } else {
+          // Database mode disabled, use static data
+          console.log('[Accessories] Database mode disabled, using static data');
+          setItems(getDefaultItems(currentLang));
+        }
+      } catch {
+        console.error('[Accessories] Error loading accessories');
+        // Fallback to static data on error
+        setItems(getDefaultItems(currentLang));
+
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+
+    loadProducts();
+  }, [currentLang]);
+
+  const t = translations[currentLang];
 
   return (
     <section className="accessories-section" id="accessories">
@@ -106,31 +200,37 @@ const Accessories: React.FC = () => {
         <h2 className="accessories-title">{t.title}</h2>
       </div>
 
-      <div className="accessories-grid">
-        {items.map((item, index) => (
-          <div
-            key={index}
-            className="accessories-card"
-            onClick={() => {
-              window.scrollTo({ top: 0, behavior: 'smooth' });
-              navigate(`/product/${item.slug}`);
-            }}
-            style={{ cursor: 'pointer' }}
-          >
-            <div className="img-wrapper">
-              <img
-                src={item.img}
-                alt={item.title}
-                className="accessories-image"
-                loading="lazy"
-              />
+      {isLoading ? (
+        <div className="accessories-loading">
+          <p>{t.loading}</p>
+        </div>
+      ) : (
+        <div className="accessories-grid">
+          {items.map((item, index) => (
+            <div
+              key={item.id || index}
+              className="accessories-card"
+              onClick={() => {
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+                navigate(`/product/${item.slug}`);
+              }}
+              style={{ cursor: 'pointer' }}
+            >
+              <div className="img-wrapper">
+                <img
+                  src={item.img}
+                  alt={item.title}
+                  className="accessories-image"
+                  loading="lazy"
+                />
+              </div>
+              <h3 className="accessories-name">{item.title}</h3>
+              <p className="accessories-price">{item.price}</p>
+              <button className="accessories-btn">{t.viewDetails}</button>
             </div>
-            <h3 className="accessories-name">{item.title}</h3>
-            <p className="accessories-price">{item.price}</p>
-            <button className="accessories-btn">{t.viewDetails}</button>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
+      )}
     </section>
   );
 };

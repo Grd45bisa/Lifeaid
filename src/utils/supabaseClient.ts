@@ -422,6 +422,18 @@ export const fetchSetting = async (key: string): Promise<string | null> => {
     }
 };
 
+// Update a setting value (upsert)
+export const updateSetting = async (key: string, value: string): Promise<void> => {
+    const { error } = await supabase
+        .from('website_settings')
+        .upsert({ key, value }, { onConflict: 'key' });
+
+    if (error) {
+        console.error(`Failed to update setting ${key}:`, error.message);
+        throw error;
+    }
+};
+
 // Check if database products mode is enabled
 export const isUsingDatabaseProducts = async (): Promise<boolean> => {
     const value = await fetchSetting('use_database_products');
@@ -446,6 +458,7 @@ export interface PublicProduct {
     category_id: string;
     category_en: string;
     is_active: boolean;
+    thumbnails_base64?: string[];
 }
 
 export const fetchPublicProducts = async (): Promise<PublicProduct[]> => {
@@ -460,5 +473,95 @@ export const fetchPublicProducts = async (): Promise<PublicProduct[]> => {
         return [];
     }
     return data || [];
+};
+
+// Fetch single product by slug for ProductDetailPage
+export const fetchProductBySlug = async (slug: string): Promise<PublicProduct | null> => {
+    const { data, error } = await supabase
+        .from('products')
+        .select('*')
+        .eq('slug', slug)
+        .eq('is_active', true)
+        .single();
+
+    if (error) {
+        console.error('Error fetching product by slug:', error);
+        return null;
+    }
+    return data;
+};
+
+// ============================================
+// FEATURED PRODUCT CONTENT
+// ============================================
+
+export interface FeaturedProductContent {
+    badge_id: string;
+    badge_en: string;
+    title_id: string;
+    title_en: string;
+    subtitle_id: string;
+    subtitle_en: string;
+    product_title_id: string;
+    product_title_en: string;
+    product_desc_id: string;
+    product_desc_en: string;
+    main_function_title_id: string;
+    main_function_title_en: string;
+    main_function_desc_id: string;
+    main_function_desc_en: string;
+    suitable_for_title_id: string;
+    suitable_for_title_en: string;
+    suitable_for_desc_id: string;
+    suitable_for_desc_en: string;
+    image_base64?: string;
+}
+
+// Default featured product content
+export const defaultFeaturedProduct: FeaturedProductContent = {
+    badge_id: 'PRODUK UNGGULAN',
+    badge_en: 'FEATURED PRODUCTS',
+    title_id: 'Koleksi Alat Bantu Mobilitas Terlengkap',
+    title_en: 'Complete Collection of Mobility Aids',
+    subtitle_id: 'Temukan alat angkat pasien elektrik terpercaya untuk transfer pasien yang aman, nyaman, dan mudah.',
+    subtitle_en: 'Find trusted electric patient lifts for safe, comfortable, and easy patient transfers.',
+    product_title_id: 'Electric Patient Lifter, alat untuk membantu mengangkat pasien stroke.',
+    product_title_en: 'Electric Patient Lifter, tool to help lift stroke patients.',
+    product_desc_id: 'Pengangkat Pasien Listrik adalah alat bantu angkat bertenaga baterai yang dirancang untuk memindahkan pasien stroke, lumpuh, atau yang memiliki gangguan mobilitas dengan aman dan mudah.',
+    product_desc_en: 'Electric Patient Lifter is a battery-powered lifting aid designed to move stroke patients, paralyzed, or those with mobility impairments safely and easily.',
+    main_function_title_id: 'Fungsi Utama:',
+    main_function_title_en: 'Main Function:',
+    main_function_desc_id: 'Memindahkan pasien dari tempat tidur ke kursi roda, mobil, atau bak mandi untuk kebutuhan sehari-hari.',
+    main_function_desc_en: 'Move patients from bed to wheelchair, car, or bathtub for daily needs.',
+    suitable_for_title_id: 'Cocok Untuk:',
+    suitable_for_title_en: 'Suitable For:',
+    suitable_for_desc_id: 'Lansia, pengguna kursi roda, penyandang disabilitas, dan pasien yang terbaring di tempat tidur atau mengalami patah tulang.',
+    suitable_for_desc_en: 'Elderly, wheelchair users, people with disabilities, and bedridden patients or those with broken bones.',
+    image_base64: ''
+};
+
+// Fetch featured product content from settings
+export const fetchFeaturedProduct = async (): Promise<FeaturedProductContent> => {
+    try {
+        const value = await fetchSetting('featured_product_content');
+        if (value) {
+            return JSON.parse(value);
+        }
+    } catch {
+        console.error('Error fetching featured product content');
+    }
+    return defaultFeaturedProduct;
+};
+
+// Update featured product content
+export const updateFeaturedProduct = async (content: FeaturedProductContent): Promise<boolean> => {
+    try {
+        const jsonValue = JSON.stringify(content);
+        await updateSetting('featured_product_content', jsonValue);
+        return true;
+    } catch {
+        console.error('Error updating featured product content');
+        return false;
+    }
 };
 
