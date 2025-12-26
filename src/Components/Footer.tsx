@@ -199,7 +199,7 @@ const Footer: React.FC = () => {
           <div className="footer-column footer-brand">
             {/* Logo */}
             <div className="footer-logo">
-              <OptimizedImage src="/LifeAid.webp" alt="LifeAid Logo" className="footer-logo-image" width={50} height={50} />
+              <OptimizedImage src="/Logo-trans.webp" alt="LifeAid Logo" className="footer-logo-image" width={50} height={50} />
               <h3 className="footer-brand-name">{t.brand}</h3>
             </div>
 

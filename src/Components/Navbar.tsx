@@ -246,7 +246,7 @@ const Navbar: React.FC = () => {
         <div className="navbar-container">
           <div className="navbar-logo">
             <a href="#" onClick={(e) => handleNavClick(e, '#')}>
-              <img src="/LifeAid.webp" alt="LifeAid" width={40} height={40} />
+              <img src="/Logo-trans.webp" alt="LifeAid" width={40} height={40} />
               <span>LifeAid</span>
             </a>
           </div>
@@ -309,7 +309,7 @@ const Navbar: React.FC = () => {
 
       <div className={`mobile-menu ${isMenuOpen ? 'open' : ''}`}>
         <div className="mobile-header">
-          <OptimizedImage src="/LifeAid.webp" alt="LifeAid" width={40} height={40} />
+          <OptimizedImage src="/Logo-trans.webp" alt="LifeAid" width={40} height={40} />
           <span>LifeAid</span>
         </div>
 
