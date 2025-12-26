@@ -11,7 +11,7 @@
   
   # Content Security Policy (CSP)
   # Note: 'unsafe-inline' needed for Vite's injected styles
-  Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' https://www.googletagmanager.com https://www.google-analytics.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https: blob:; connect-src 'self' https://*.supabase.co https://api.emailjs.com https://ipapi.co wss://*.supabase.co; frame-ancestors 'none'; form-action 'self'; base-uri 'self'; object-src 'none'
+  Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' https://www.googletagmanager.com https://www.google-analytics.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https: blob:; connect-src 'self' https://*.supabase.co https://api.emailjs.com https://ipapi.co wss://*.supabase.co; frame-src 'self' https://www.youtube.com; frame-ancestors 'none'; form-action 'self'; base-uri 'self'; object-src 'none'
 
   # Strict Transport Security (HTTPS)
   Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
