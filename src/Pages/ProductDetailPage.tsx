@@ -311,13 +311,12 @@ const ProductDetailPage: React.FC = () => {
           </div>
 
           <div className="tabs">
-            <button
-              type="button"
-              className={`tab-btn ${activeTab === 'detail' ? 'active' : ''}`}
+            <div
+              className={`tab-item ${activeTab === 'detail' ? 'active' : ''}`}
               onClick={() => setActiveTab('detail')}
             >
               {currentLang === 'id' ? 'Detail Produk' : 'Product Details'}
-            </button>
+            </div>
           </div>
 
           <div className="tab-content">

@@ -108,14 +108,33 @@
     border-bottom: 2px solid #e2e8f0;
 }
 
-.tab-btn {
-    padding-bottom: 0.75rem;
+.tabs .tab-item {
+    padding: 0.75rem 1.5rem;
+    background: transparent;
+    color: #64748b;
+    border: none;
+    border-bottom: 2px solid transparent;
+    border-radius: 0;
     font-size: 1rem;
-    font-weight: 500;
+    font-weight: 600;
     cursor: pointer;
-    position: relative;
-    margin-bottom: 1.25rem;
+    transition: all 0.2s ease;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: -2px;
+    /* Pull down to overlap border */
+}
+
+.tabs .tab-item:hover {
+    color: #1a202c;
+    background: rgba(0, 0, 0, 0.02);
+}
+
+.tabs .tab-item.active {
+    background: transparent;
     color: #224570;
+    border-color: #224570;
 }
 
 .selected-variant {
@@ -515,7 +534,7 @@
         font-size: 1.35rem;
     }
 
-    .tab-btn {
+    .tab-item {
         font-size: 0.9rem;
     }
 
@@ -534,7 +553,7 @@
 @media (prefers-reduced-motion: reduce) {
 
     .thumb-item,
-    .tab-btn,
+    .tab-item,
     .btn,
     .social-btn,
     .dropdown-menu {
@@ -557,9 +576,10 @@
     }
 
     .thumb-item.active,
-    .tab-btn.active::after {
+    .tab-item.active {
         border-color: #000000;
-        background: #000000;
+        background: transparent;
+        border-bottom-width: 3px;
     }
 
     .btn-primary {

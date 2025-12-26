@@ -327,20 +327,18 @@ const AdminProductForm = () => {
 
                     {/* Language Tabs */}
                     <div className="lang-tabs">
-                        <button
-                            type="button"
-                            className={activeTab === 'id' ? 'active' : ''}
+                        <div
+                            className={`tab-item ${activeTab === 'id' ? 'active' : ''}`}
                             onClick={() => setActiveTab('id')}
                         >
                             🇮🇩 Bahasa Indonesia
-                        </button>
-                        <button
-                            type="button"
-                            className={activeTab === 'en' ? 'active' : ''}
+                        </div>
+                        <div
+                            className={`tab-item ${activeTab === 'en' ? 'active' : ''}`}
                             onClick={() => setActiveTab('en')}
                         >
                             🇬🇧 English
-                        </button>
+                        </div>
                     </div>
 
                     {/* ID Fields */}

@@ -62,15 +62,15 @@ const AdminMessages = () => {
             <header className="page-header">
                 <h1>{t.messages.title[lang]}</h1>
                 <div className="filter-tabs">
-                    <button className={filter === 'all' ? 'active' : ''} onClick={() => setFilter('all')}>
+                    <div className={`tab-item ${filter === 'all' ? 'active' : ''}`} onClick={() => setFilter('all')}>
                         {lang === 'id' ? 'Semua' : 'All'} ({messages.length})
-                    </button>
-                    <button className={filter === 'unread' ? 'active' : ''} onClick={() => setFilter('unread')}>
+                    </div>
+                    <div className={`tab-item ${filter === 'unread' ? 'active' : ''}`} onClick={() => setFilter('unread')}>
                         {t.messages.unread[lang]} ({messages.filter(m => !m.is_read).length})
-                    </button>
-                    <button className={filter === 'replied' ? 'active' : ''} onClick={() => setFilter('replied')}>
+                    </div>
+                    <div className={`tab-item ${filter === 'replied' ? 'active' : ''}`} onClick={() => setFilter('replied')}>
                         {t.messages.replied[lang]} ({messages.filter(m => m.is_replied).length})
-                    </button>
+                    </div>
                 </div>
             </header>
 

@@ -27,20 +27,28 @@
     gap: 0.5rem;
 }
 
-.filter-tabs button {
+.filter-tabs .tab-item {
     padding: 0.5rem 1rem;
-    background: #f1f5f9;
+    background: transparent;
     color: #64748b;
     border: none;
-    border-radius: 8px;
-    font-size: 0.8125rem;
+    border-bottom: 2px solid transparent;
+    border-radius: 4px 4px 0 0;
+    font-size: 0.875rem;
     font-weight: 600;
     cursor: pointer;
+    transition: all 0.2s ease;
 }
 
-.filter-tabs button.active {
-    background: #224570;
-    color: white;
+.filter-tabs .tab-item:hover {
+    color: #1a202c;
+    background: rgba(0, 0, 0, 0.02);
+}
+
+.filter-tabs .tab-item.active {
+    background: transparent;
+    color: #224570;
+    border-bottom: 2px solid #224570;
 }
 
 .messages-layout {
