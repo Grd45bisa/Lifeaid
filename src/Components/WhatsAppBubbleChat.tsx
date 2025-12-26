@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import './styles/WhatsAppBubbleChat.css';
 import emailjs from '@emailjs/browser';
 import { supabase } from '../utils/supabaseClient';
+import OptimizedImage from './ui/OptimizedImage';
 
 type Language = 'id' | 'en';
 type ChatMode = 'choice' | 'whatsapp' | 'website' | 'form';
@@ -998,9 +999,12 @@ const WhatsAppBubbleChat: React.FC = () => {
           <div className="wa-header">
             <div className="wa-profile">
               <div className="wa-avatar">
-                <img
-                  src="./Logo-trans.webp"
+                <OptimizedImage
+                  src="/Logo-trans.webp"
                   alt="Support"
+                  width={40}
+                  height={40}
+                  className="wa-avatar-img"
                 />
                 <span className="wa-status-dot"></span>
               </div>

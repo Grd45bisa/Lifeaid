@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { isUsingDatabaseProducts, fetchPublicProducts, type PublicProduct } from '../utils/supabaseClient';
 import './styles/Accessories.css';
+import OptimizedImage from './ui/OptimizedImage';
 
 // Language type
 type Language = 'id' | 'en';
@@ -217,11 +218,12 @@ const Accessories: React.FC = () => {
               style={{ cursor: 'pointer' }}
             >
               <div className="img-wrapper">
-                <img
+                <OptimizedImage
                   src={item.img}
                   alt={item.title}
                   className="accessories-image"
-                  loading="lazy"
+                  aspectRatio="1/1"
+                  placeholder="#f5f5f5"
                 />
               </div>
               <h3 className="accessories-name">{item.title}</h3>

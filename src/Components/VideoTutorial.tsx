@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import './styles/VideoTutorial.css';
+import OptimizedImage from './ui/OptimizedImage';
 import { detectLanguage, type Language } from '../utils/languageUtils';
 
 const translations = {
@@ -96,7 +97,7 @@ const VideoTutorial: React.FC = () => {
                   cursor: 'pointer'
                 }}
               >
-                <img
+                <OptimizedImage
                   src={currentLang === 'id'
                     ? '/Videos/VideoThumbnail.webp'
                     : '/Videos/How_to_Use_LifeAid_-_Electric_Patient_Lifter.webp'
@@ -104,6 +105,7 @@ const VideoTutorial: React.FC = () => {
                   alt="Video Thumbnail"
                   className="video-element"
                   style={{ objectFit: 'cover' }}
+                  aspectRatio="16/9"
                 />
                 <div className="video-play-overlay">
                   <button className="video-play-button" aria-label="Play video">

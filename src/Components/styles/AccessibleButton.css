@@ -1,0 +1,123 @@
+.accessible-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    font-weight: 500;
+    border-radius: 0.5rem;
+    border: none;
+    cursor: pointer;
+    transition: all 150ms ease;
+    position: relative;
+    font-family: inherit;
+}
+
+/* Focus styles - CRITICAL for accessibility */
+.accessible-btn:focus-visible {
+    outline: 2px solid #2563eb;
+    outline-offset: 2px;
+}
+
+.accessible-btn:disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+/* Sizes */
+.accessible-btn--sm {
+    padding: 0.375rem 0.75rem;
+    font-size: 0.875rem;
+    min-height: 32px;
+}
+
+.accessible-btn--md {
+    padding: 0.5rem 1rem;
+    font-size: 1rem;
+    min-height: 40px;
+}
+
+.accessible-btn--lg {
+    padding: 0.75rem 1.5rem;
+    font-size: 1.125rem;
+    min-height: 48px;
+}
+
+/* Variants */
+.accessible-btn--primary {
+    background-color: #2563eb;
+    color: white;
+}
+
+.accessible-btn--primary:hover:not(:disabled) {
+    background-color: #1d4ed8;
+}
+
+.accessible-btn--secondary {
+    background-color: #e5e7eb;
+    color: #1f2937;
+}
+
+.accessible-btn--secondary:hover:not(:disabled) {
+    background-color: #d1d5db;
+}
+
+.accessible-btn--ghost {
+    background-color: transparent;
+    color: #374151;
+}
+
+.accessible-btn--ghost:hover:not(:disabled) {
+    background-color: #f3f4f6;
+}
+
+.accessible-btn--danger {
+    background-color: #dc2626;
+    color: white;
+}
+
+.accessible-btn--danger:hover:not(:disabled) {
+    background-color: #b91c1c;
+}
+
+/* Loading state */
+.accessible-btn--loading {
+    pointer-events: none;
+}
+
+.accessible-btn__spinner {
+    position: absolute;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.accessible-btn__spinner svg {
+    width: 1.25em;
+    height: 1.25em;
+}
+
+.accessible-btn__text--hidden {
+    visibility: hidden;
+}
+
+/* Icons */
+.accessible-btn__icon {
+    display: inline-flex;
+    flex-shrink: 0;
+}
+
+.accessible-btn__icon svg {
+    width: 1em;
+    height: 1em;
+}
+
+/* Animation */
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.animate-spin {
+    animation: spin 1s linear infinite;
+}

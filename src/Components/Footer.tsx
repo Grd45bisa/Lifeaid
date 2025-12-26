@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import emailjs from '@emailjs/browser';
 import { supabase } from '../utils/supabaseClient';
 import './styles/Footer.css';
+import OptimizedImage from './ui/OptimizedImage';
 
 // Language type
 type Language = 'id' | 'en';
@@ -198,7 +199,7 @@ const Footer: React.FC = () => {
           <div className="footer-column footer-brand">
             {/* Logo */}
             <div className="footer-logo">
-              <img src="/LifeAid.webp" alt="LifeAid Logo" className="footer-logo-image" loading="lazy" />
+              <OptimizedImage src="/LifeAid.webp" alt="LifeAid Logo" className="footer-logo-image" width={50} height={50} />
               <h3 className="footer-brand-name">{t.brand}</h3>
             </div>
 

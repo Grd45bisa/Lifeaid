@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './styles/Product.css';
+import OptimizedImage from './ui/OptimizedImage';
 import Accessories from './Accessories';
 import { isUsingDatabaseProducts, fetchFeaturedProduct, type FeaturedProductContent, defaultFeaturedProduct } from '../utils/supabaseClient';
 
@@ -140,13 +141,14 @@ const Product: React.FC = () => {
 
         <div className="product-container">
           <div className="product-image">
-            <img
+            <OptimizedImage
               src={productImage}
               alt={currentLang === 'id'
                 ? 'Electric Patient Lifter LifeAid'
                 : 'Electric Patient Lifter LifeAid'}
               className="product-image-main"
-              loading="lazy"
+              aspectRatio="1/1"
+              placeholder="#f0f0f0"
             />
           </div>
 

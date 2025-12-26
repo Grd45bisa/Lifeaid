@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import './styles/Navbar.css';
+import OptimizedImage from './ui/OptimizedImage';
 
 // Language type
 type Language = 'id' | 'en';
@@ -245,7 +246,7 @@ const Navbar: React.FC = () => {
         <div className="navbar-container">
           <div className="navbar-logo">
             <a href="#" onClick={(e) => handleNavClick(e, '#')}>
-              <img src="/Logo-trans.png" alt="LifeAid" />
+              <OptimizedImage src="/Logo-trans.png" alt="LifeAid" width={40} height={40} priority />
               <span>LifeAid</span>
             </a>
           </div>
@@ -308,7 +309,7 @@ const Navbar: React.FC = () => {
 
       <div className={`mobile-menu ${isMenuOpen ? 'open' : ''}`}>
         <div className="mobile-header">
-          <img src="/LifeAid.webp" alt="LifeAid" />
+          <OptimizedImage src="/LifeAid.webp" alt="LifeAid" width={40} height={40} />
           <span>LifeAid</span>
         </div>
 

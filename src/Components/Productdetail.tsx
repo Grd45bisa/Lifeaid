@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import './styles/Productdetail.css';
+import OptimizedImage from './ui/OptimizedImage';
 
 // Language type
 type Language = 'id' | 'en';
@@ -75,13 +76,14 @@ const ProductDetail: React.FC = () => {
     <section className="product-detail" id="product-detail">
       <div className="product-detail-container">
         <div className="product-detail-image">
-          <img
+          <OptimizedImage
             src="/Productdetail.webp"
             alt={currentLang === 'id'
               ? 'Electric Patient Lifter HY101-01A Detail'
               : 'Electric Patient Lifter HY101-01A Detail'}
             className="product-detail-image-main"
-            loading="lazy"
+            aspectRatio="4/3"
+            placeholder="#f5f5f5"
           />
         </div>
 

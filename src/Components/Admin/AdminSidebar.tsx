@@ -3,6 +3,7 @@ import { NavLink, useNavigate } from 'react-router-dom';
 import { useAdminLanguage, adminTranslations as t } from './AdminLanguageContext';
 import { signOut } from '../../utils/supabaseClient';
 import './AdminSidebar.css';
+import OptimizedImage from '../ui/OptimizedImage';
 
 // Icons as SVG components
 const DashboardIcon = () => (
@@ -119,7 +120,7 @@ const AdminSidebar = () => {
                     {isMobileOpen ? <CloseIcon /> : <MenuIcon />}
                 </button>
                 <div className="mobile-logo">
-                    <img src="/Logo-trans.webp" alt="LifeAid" />
+                    <OptimizedImage src="/Logo-trans.webp" alt="LifeAid" width={32} height={32} />
                     <span>{t.sidebar.admin[lang]}</span>
                 </div>
             </div>
@@ -133,7 +134,7 @@ const AdminSidebar = () => {
             <aside className={`admin-sidebar ${isMobileOpen ? 'mobile-open' : ''}`}>
                 {/* Logo */}
                 <div className="sidebar-logo">
-                    <img src="/Logo-trans.webp" alt="LifeAid Logo" />
+                    <OptimizedImage src="/Logo-trans.webp" alt="LifeAid Logo" width={40} height={40} />
                     <span>{t.sidebar.adminPanel[lang]}</span>
                 </div>
 
