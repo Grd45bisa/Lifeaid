@@ -40,7 +40,7 @@ export const detectCountry = async (): Promise<Language> => {
                 return 'id';
             }
         }
-    } catch (error) {
+    } catch {
         console.log('Geolocation detection failed, using default');
     }
 

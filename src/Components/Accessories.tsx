@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { isUsingDatabaseProducts, fetchPublicProducts, type PublicProduct } from '../utils/supabaseClient';
 import './styles/Accessories.css';
-import OptimizedImage from './ui/OptimizedImage';
 
 // Language type
 type Language = 'id' | 'en';
@@ -211,19 +210,29 @@ const Accessories: React.FC = () => {
             <div
               key={item.id || index}
               className="accessories-card"
+              role="button"
+              tabIndex={0}
               onClick={() => {
                 window.scrollTo({ top: 0, behavior: 'smooth' });
                 navigate(`/product/${item.slug}`);
               }}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault();
+                  window.scrollTo({ top: 0, behavior: 'smooth' });
+                  navigate(`/product/${item.slug}`);
+                }
+              }}
               style={{ cursor: 'pointer' }}
             >
               <div className="img-wrapper">
-                <OptimizedImage
+                <img
                   src={item.img}
                   alt={item.title}
                   className="accessories-image"
-                  aspectRatio="1/1"
-                  placeholder="#f5f5f5"
+                  loading="lazy"
+                  width={250}
+                  height={250}
                 />
               </div>
               <h3 className="accessories-name">{item.title}</h3>

@@ -10,9 +10,9 @@ Disallow: /*?*sort=
 Disallow: /*?*filter=
 
 # Sitemap location
-Sitemap: https://lifeaid.co.id/sitemap.xml
-Sitemap: https://lifeaid.co.id/sitemap-products.xml
-Sitemap: https://lifeaid.co.id/sitemap-pages.xml
+Sitemap: https://lifeaidstore.com/sitemap.xml
+Sitemap: https://lifeaidstore.com/sitemap-products.xml
+Sitemap: https://lifeaidstore.com/sitemap-pages.xml
 
 # Crawl-delay for specific bots
 User-agent: Googlebot

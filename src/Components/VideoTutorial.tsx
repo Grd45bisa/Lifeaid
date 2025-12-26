@@ -68,20 +68,24 @@ const VideoTutorial: React.FC = () => {
         <div className="video-wrapper">
           <div className="video-aspect-ratio" style={{ position: 'relative' }}>
             {/* YouTube Video - dengan autoplay */}
-            <iframe
-              src={showThumbnail
-                ? `https://www.youtube.com/embed/${youtubeVideoId}`
-                : `https://www.youtube.com/embed/${youtubeVideoId}?autoplay=1`
-              }
-              className="video-element"
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-              allowFullScreen
-              title="LifeAid Tutorial"
-              style={{
-                border: 'none',
-                display: showThumbnail ? 'none' : 'block'
-              }}
-            ></iframe>
+            {/* YouTube Video - Render ONLY when playing to save resources */}
+            {!showThumbnail && (
+              <iframe
+                src={`https://www.youtube.com/embed/${youtubeVideoId}?autoplay=1`}
+                className="video-element"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
+                title="LifeAid Tutorial"
+                style={{
+                  border: 'none',
+                  width: '100%',
+                  height: '100%',
+                  position: 'absolute',
+                  top: 0,
+                  left: 0
+                }}
+              ></iframe>
+            )}
 
             {/* Thumbnail Overlay */}
             {showThumbnail && (

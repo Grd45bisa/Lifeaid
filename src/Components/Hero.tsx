@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import './styles/Hero.css';
-import OptimizedImage from './ui/OptimizedImage';
 
 // Language type
 type Language = 'id' | 'en';
@@ -101,16 +100,16 @@ const Hero: React.FC = () => {
         </div>
 
         <div className="hero-image">
-          <OptimizedImage
+          <img
             src="/Hero.webp"
             alt={currentLang === 'id'
               ? 'Electric Patient Lift - Lifeaid'
               : 'Electric Patient Lift - Lifeaid'}
             className="hero-image-main"
-            priority
             width={600}
             height={500}
-            placeholder="#f8f9fa"
+            loading="eager"
+            fetchPriority="high"
           />
         </div>
       </div>

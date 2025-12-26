@@ -91,3 +91,84 @@ h6 {
 #root {
   isolation: isolate;
 }
+
+/* ===========================================
+   Mobile Optimization Utilities
+   =========================================== */
+
+/* Touch target minimum size (WCAG 2.5.5) */
+.touch-target {
+  min-width: 48px;
+  min-height: 48px;
+  padding: 12px;
+}
+
+/* Tap highlight for mobile */
+button,
+a,
+[role="button"] {
+  -webkit-tap-highlight-color: rgba(37, 99, 235, 0.2);
+  touch-action: manipulation;
+}
+
+/* Ensure buttons/links have minimum touch target */
+button:not(.icon-only),
+a:not(.icon-only) {
+  min-height: 44px;
+}
+
+/* Reduce motion for users who prefer it */
+@media (prefers-reduced-motion: reduce) {
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Responsive typography */
+html {
+  font-size: 16px;
+  /* Base for rem calculations */
+}
+
+@media (max-width: 640px) {
+  html {
+    font-size: 14px;
+    /* Slightly smaller on mobile for more content */
+  }
+
+  h1 {
+    font-size: 1.75rem;
+  }
+
+  h2 {
+    font-size: 1.5rem;
+  }
+
+  h3 {
+    font-size: 1.25rem;
+  }
+}
+
+/* Improve touch scrolling */
+.scroll-container {
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+}
+
+/* Hide scrollbar on mobile but keep functionality */
+@media (max-width: 768px) {
+  .hide-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+
+  .hide-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+}

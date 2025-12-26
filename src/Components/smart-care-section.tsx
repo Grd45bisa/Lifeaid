@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import './styles/SmartCare.css';
-import OptimizedImage from './ui/OptimizedImage';
 
 // Language type
 type Language = 'id' | 'en';
@@ -181,14 +180,13 @@ const SmartCare: React.FC = () => {
           {/* Image Section */}
           <div className="image-section">
             <div className="image-container">
-              <OptimizedImage
+              <img
                 src="/spec2.webp"
                 alt={currentLang === 'id'
                   ? 'SmartCare Electric Patient Lifter'
                   : 'SmartCare Electric Patient Lifter'}
                 className="product-image"
-                aspectRatio="4/3"
-                placeholder="#f8f9fa"
+                loading="lazy"
               />
             </div>
           </div>

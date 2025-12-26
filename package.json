@@ -8,6 +8,8 @@
     "build": "tsc -b && vite build",
     "build:analyze": "tsc -b && vite build && echo Open stats.html to analyze bundle",
     "preview": "vite preview --port 4173",
+    "lighthouse": "npx @lhci/cli autorun",
+    "lighthouse:local": "npx lighthouse http://localhost:4173 --view",
     "lint": "eslint .",
     "size": "tsc -b && vite build && node -e \"const fs=require('fs');const path='dist/assets/js';fs.readdirSync(path).forEach(f=>console.log(f,(fs.statSync(path+'/'+f).size/1024).toFixed(2)+'KB'))\""
   },

@@ -290,13 +290,14 @@ const ProductDetailPage: React.FC = () => {
 
           <div className="thumb-list">
             {product.thumbnails.map((thumb, index) => (
-              <div
+              <button
+                type="button"
                 key={index}
                 className={`thumb-item ${activeThumbnail === index ? 'active' : ''}`}
                 onClick={() => handleThumbnailClick(index, thumb)}
               >
                 <img src={thumb} alt={`${product.title[currentLang]} ${index + 1}`} />
-              </div>
+              </button>
             ))}
           </div>
         </div>
@@ -310,12 +311,13 @@ const ProductDetailPage: React.FC = () => {
           </div>
 
           <div className="tabs">
-            <div
+            <button
+              type="button"
               className={`tab-btn ${activeTab === 'detail' ? 'active' : ''}`}
               onClick={() => setActiveTab('detail')}
             >
               {currentLang === 'id' ? 'Detail Produk' : 'Product Details'}
-            </div>
+            </button>
           </div>
 
           <div className="tab-content">

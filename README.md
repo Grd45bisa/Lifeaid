@@ -208,8 +208,8 @@ Distributed under the MIT License. See `LICENSE` for more information.
 ## 📞 Contact
 
 **LifeAid Indonesia**
-- Website: [lifeaid.co.id](https://lifeaid.co.id)
-- Email: info@lifeaid.co.id
+- Website: [lifeaidstore.com](https://lifeaidstore.com)
+- Email: info@lifeaidstore.com
 
 ---
 

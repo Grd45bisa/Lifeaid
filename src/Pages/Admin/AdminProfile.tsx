@@ -147,8 +147,9 @@ const AdminProfilePage = () => {
                     <h2>{lang === 'id' ? 'Nama Tampilan' : 'Display Name'}</h2>
                     <form onSubmit={handleUpdateName}>
                         <div className="form-group">
-                            <label>{lang === 'id' ? 'Nama' : 'Name'}</label>
+                            <label htmlFor="profile-name">{lang === 'id' ? 'Nama' : 'Name'}</label>
                             <input
+                                id="profile-name"
                                 type="text"
                                 value={displayName}
                                 onChange={(e) => setDisplayName(e.target.value)}
@@ -167,8 +168,9 @@ const AdminProfilePage = () => {
                     <h2>{lang === 'id' ? 'Ubah Email' : 'Change Email'}</h2>
                     <form onSubmit={handleUpdateEmail}>
                         <div className="form-group">
-                            <label>Email</label>
+                            <label htmlFor="profile-email">Email</label>
                             <input
+                                id="profile-email"
                                 type="email"
                                 value={newEmail}
                                 onChange={(e) => setNewEmail(e.target.value)}
@@ -192,8 +194,9 @@ const AdminProfilePage = () => {
                     <h2>{lang === 'id' ? 'Ubah Password' : 'Change Password'}</h2>
                     <form onSubmit={handleUpdatePassword}>
                         <div className="form-group">
-                            <label>{lang === 'id' ? 'Password Baru' : 'New Password'}</label>
+                            <label htmlFor="profile-password">{lang === 'id' ? 'Password Baru' : 'New Password'}</label>
                             <input
+                                id="profile-password"
                                 type="password"
                                 value={newPassword}
                                 onChange={(e) => setNewPassword(e.target.value)}
@@ -202,8 +205,9 @@ const AdminProfilePage = () => {
                             />
                         </div>
                         <div className="form-group">
-                            <label>{lang === 'id' ? 'Konfirmasi Password' : 'Confirm Password'}</label>
+                            <label htmlFor="profile-password-confirm">{lang === 'id' ? 'Konfirmasi Password' : 'Confirm Password'}</label>
                             <input
+                                id="profile-password-confirm"
                                 type="password"
                                 value={confirmPassword}
                                 onChange={(e) => setConfirmPassword(e.target.value)}

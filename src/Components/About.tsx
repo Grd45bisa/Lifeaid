@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import './styles/About.css';
-import OptimizedImage from './ui/OptimizedImage';
 
 // Language type
 type Language = 'id' | 'en';
@@ -141,14 +140,13 @@ const About: React.FC = () => {
 
       <div className="about-container">
         <div className="about-image">
-          <OptimizedImage
+          <img
             src="/About.webp"
             alt={currentLang === 'id'
               ? 'Alat bantu angkat pasien LifeAid'
               : 'LifeAid patient lift aid'}
             className="about-image-main"
-            aspectRatio="4/3"
-            placeholder="#f0f0f0"
+            loading="lazy"
           />
         </div>
 

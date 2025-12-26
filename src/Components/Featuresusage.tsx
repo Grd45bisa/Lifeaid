@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import './styles/Featuresusage.css';
-import OptimizedImage from './ui/OptimizedImage';
 
 // Language type
 type Language = 'id' | 'en';
@@ -220,11 +219,10 @@ const FeaturesUsage: React.FC = () => {
             {t.guides.map((guide, index) => (
               <div key={index} className="feature-usage-card">
                 <div className="feature-usage-image">
-                  <OptimizedImage
+                  <img
                     src={`/Guide${index + 1}.webp`}
                     alt={guide.title}
-                    aspectRatio="16/9"
-                    placeholder="#e8e8e8"
+                    loading="lazy"
                   />
                 </div>
 
@@ -254,11 +252,10 @@ const FeaturesUsage: React.FC = () => {
             {t.features.map((feature, index) => (
               <div key={index} className="feature-usage-card">
                 <div className="feature-usage-image">
-                  <OptimizedImage
+                  <img
                     src={index === 3 ? '/feature-4.avif' : index === 4 ? '/feature-5.avif' : index === 5 ? '/feature-6.avif' : index === 6 ? '/feature-7.avif' : `/feature-${index + 1}.webp`}
                     alt={feature.title}
-                    aspectRatio="16/9"
-                    placeholder="#e8e8e8"
+                    loading="lazy"
                   />
                 </div>
 

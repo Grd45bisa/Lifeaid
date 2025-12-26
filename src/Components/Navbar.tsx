@@ -246,7 +246,7 @@ const Navbar: React.FC = () => {
         <div className="navbar-container">
           <div className="navbar-logo">
             <a href="#" onClick={(e) => handleNavClick(e, '#')}>
-              <OptimizedImage src="/Logo-trans.png" alt="LifeAid" width={40} height={40} priority />
+              <img src="/LifeAid.webp" alt="LifeAid" width={40} height={40} />
               <span>LifeAid</span>
             </a>
           </div>

@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import './styles/ProductSpecifications.css';
-import OptimizedImage from './ui/OptimizedImage';
 
 // Language type
 type Language = 'id' | 'en';
@@ -344,14 +343,13 @@ const ProductSpecifications: React.FC = () => {
 
       <div className="specs-container">
         <div className="specs-image">
-          <OptimizedImage
+          <img
             src="/Productdetail.webp"
             alt={currentLang === 'id'
               ? 'Spesifikasi Electric Patient Lifter'
               : 'Electric Patient Lifter Specifications'}
             className="specs-image-main"
-            aspectRatio="4/3"
-            placeholder="#f0f0f0"
+            loading="lazy"
           />
         </div>
 

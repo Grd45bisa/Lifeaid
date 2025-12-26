@@ -439,8 +439,9 @@ const AdminProductForm = () => {
                             />
                         </div>
                         <div className="form-group">
-                            <label>Slug</label>
+                            <label htmlFor="product-slug">Slug</label>
                             <input
+                                id="product-slug"
                                 type="text"
                                 value={formData.slug}
                                 onChange={(e) => handleChange('slug', e.target.value)}
@@ -450,8 +451,9 @@ const AdminProductForm = () => {
                     </div>
                     <div className="form-row">
                         <div className="form-group">
-                            <label>Sort Order</label>
+                            <label htmlFor="product-sort-order">Sort Order</label>
                             <input
+                                id="product-sort-order"
                                 type="number"
                                 value={formData.sort_order}
                                 onChange={(e) => handleChange('sort_order', parseInt(e.target.value) || 0)}
