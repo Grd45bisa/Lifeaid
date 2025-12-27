@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useAdminLanguage, adminTranslations as t } from '../../Components/Admin/AdminLanguageContext';
 import { createTestimonial, updateTestimonial, fetchTestimonials } from '../../utils/supabaseClient';
@@ -19,6 +19,31 @@ const AdminTestimonialForm = () => {
     const [isSaving, setIsSaving] = useState(false);
     const [isTranslating, setIsTranslating] = useState(false);
     const [activeTab, setActiveTab] = useState<'id' | 'en'>('id');
+
+    // Language Switcher Logic
+    const tabsRef = useRef<HTMLDivElement>(null);
+    const [sliderStyle, setSliderStyle] = useState<React.CSSProperties>({});
+
+    useEffect(() => {
+        const updateSlider = () => {
+            if (tabsRef.current) {
+                const activeBtn = tabsRef.current.querySelector('.tab-item.active') as HTMLElement;
+                if (activeBtn) {
+                    setSliderStyle({
+                        width: `${activeBtn.offsetWidth}px`,
+                        transform: `translateX(${activeBtn.offsetLeft - 4}px)`
+                    });
+                }
+            }
+        };
+        updateSlider();
+        const timer = setTimeout(updateSlider, 50);
+        window.addEventListener('resize', updateSlider);
+        return () => {
+            window.removeEventListener('resize', updateSlider);
+            clearTimeout(timer);
+        };
+    }, [activeTab]);
     const [formData, setFormData] = useState({
         name: '',
         role_id: '',
@@ -152,25 +177,32 @@ const AdminTestimonialForm = () => {
 
                     {/* Lang Tabs Header with Translate Button */}
                     <div className="lang-tabs-header" style={{ marginTop: '1.5rem' }}>
-                        <div className="lang-tabs">
-                            <div
+                        <div className="lang-tabs" ref={tabsRef}>
+                            <div className="slider" style={sliderStyle}></div>
+                            <button
+                                type="button"
                                 className={`tab-item ${activeTab === 'id' ? 'active' : ''}`}
                                 onClick={() => setActiveTab('id')}
                             >
-                                🇮🇩 Bahasa Indonesia
-                            </div>
-                            <div
+                                <span className="t-short">ID</span>
+                                <span className="t-full">ID INDONESIA</span>
+                            </button>
+                            <button
+                                type="button"
                                 className={`tab-item ${activeTab === 'en' ? 'active' : ''}`}
                                 onClick={() => setActiveTab('en')}
                             >
-                                🇬🇧 English
-                            </div>
+                                <span className="t-short">EN</span>
+                                <span className="t-full">EN ENGLISH</span>
+                            </button>
                         </div>
                         <button type="button" className="translate-btn" onClick={handleAutoTranslate} disabled={isTranslating}>
                             <TranslateIcon />
-                            {isTranslating
-                                ? (lang === 'id' ? 'Menerjemahkan...' : 'Translating...')
-                                : (activeTab === 'id' ? 'Translate → EN' : 'Translate → ID')}
+                            <span className="btn-text">
+                                {isTranslating
+                                    ? (lang === 'id' ? 'Menerjemahkan...' : 'Translating...')
+                                    : (activeTab === 'id' ? 'Translate → EN' : 'Translate → ID')}
+                            </span>
                         </button>
                     </div>
 

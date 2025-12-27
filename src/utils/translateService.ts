@@ -6,10 +6,6 @@
 const GOOGLE_API = 'https://translate.googleapis.com/translate_a/single';
 const MYMEMORY_API = 'https://api.mymemory.translated.net/get';
 
-interface TranslateResponse {
-    translatedText: string;
-}
-
 /**
  * Translate using Google (Unofficial GTX Client)
  */
