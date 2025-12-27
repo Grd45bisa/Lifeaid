@@ -239,6 +239,7 @@
 
 /* Large Desktop (1200px+) */
 @media (min-width: 1200px) {
+
   /* 3 items per view */
   .testimonials-track {
     gap: 2rem;
@@ -247,6 +248,7 @@
 
 /* Desktop (1024px - 1199px) */
 @media (min-width: 1024px) and (max-width: 1199px) {
+
   /* 3 items per view */
   .testimonials {
     padding: 3.5rem 1.25rem;
@@ -275,6 +277,7 @@
 
 /* Tablet Landscape (768px - 1023px) */
 @media (min-width: 768px) and (max-width: 1023px) {
+
   /* 2 items per view */
   .testimonials {
     padding: 3rem 1rem;
@@ -308,6 +311,7 @@
 
 /* Tablet Portrait (600px - 767px) */
 @media (min-width: 600px) and (max-width: 767px) {
+
   /* 2 items per view */
   .testimonials {
     padding: 2.5rem 1rem;
@@ -348,6 +352,7 @@
 
 /* Mobile Large (480px - 599px) */
 @media (min-width: 480px) and (max-width: 599px) {
+
   /* 1 item per view */
   .testimonials {
     padding: 2.5rem 0.875rem;
@@ -393,6 +398,7 @@
 
 /* Mobile Medium (375px - 479px) */
 @media (min-width: 375px) and (max-width: 479px) {
+
   /* 1 item per view */
   .testimonials {
     padding: 2rem 0.75rem;
@@ -439,6 +445,7 @@
 
 /* Mobile Small (< 375px) */
 @media (max-width: 374px) {
+
   /* 1 item per view */
   .testimonials {
     padding: 2rem 0.625rem;
@@ -502,19 +509,21 @@
    =================================== */
 
 @media (prefers-reduced-motion: reduce) {
+
   .testimonial-card,
   .carousel-arrow,
   .carousel-dot,
   .testimonials-track {
     transition: none;
   }
-  
+
   .star {
     transition: none;
   }
 }
 
 @media (prefers-contrast: high) {
+
   .testimonials-title,
   .author-name {
     color: #000000;
@@ -663,7 +672,7 @@
   }
 
   .testimonials-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: 2fr;
     gap: 1.25rem;
   }
 
@@ -691,7 +700,7 @@
   }
 
   .testimonials-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: 2fr;
     gap: 1rem;
   }
 
@@ -754,13 +763,14 @@
   .testimonial-card {
     transition: none;
   }
-  
+
   .star {
     transition: none;
   }
 }
 
 @media (prefers-contrast: high) {
+
   .testimonials-title,
   .author-name {
     color: #000000;

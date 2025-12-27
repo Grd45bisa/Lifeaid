@@ -2,7 +2,12 @@ import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useAdminLanguage, adminTranslations as t } from '../../Components/Admin/AdminLanguageContext';
 import { createTestimonial, updateTestimonial, fetchTestimonials } from '../../utils/supabaseClient';
+import { translateMultiple } from '../../utils/translateService';
 import './AdminTestimonialForm.css';
+import '../Admin/AdminProductForm.css';
+
+// Translate icon
+const TranslateIcon = () => <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12.87 15.07l-2.54-2.51.03-.03A17.52 17.52 0 0 0 14.07 6H17V4h-7V2H8v2H1v1.99h11.17C11.5 7.92 10.44 9.75 9 11.35 8.07 10.32 7.3 9.19 6.69 8h-2c.73 1.63 1.73 3.17 2.98 4.56l-5.09 5.02L4 19l5-5 3.11 3.11.76-2.04zM18.5 10h-2L12 22h2l1.12-3h4.75L21 22h2l-4.5-12zm-2.62 7l1.62-4.33L19.12 17h-3.24z" /></svg>;
 
 const AdminTestimonialForm = () => {
     const { lang } = useAdminLanguage();
@@ -12,6 +17,8 @@ const AdminTestimonialForm = () => {
 
     const [isLoading, setIsLoading] = useState(false);
     const [isSaving, setIsSaving] = useState(false);
+    const [isTranslating, setIsTranslating] = useState(false);
+    const [activeTab, setActiveTab] = useState<'id' | 'en'>('id');
     const [formData, setFormData] = useState({
         name: '',
         role_id: '',
@@ -53,6 +60,46 @@ const AdminTestimonialForm = () => {
         }
     };
 
+    // Auto translate handler
+    const handleAutoTranslate = async () => {
+        setIsTranslating(true);
+        try {
+            const sourceLang = activeTab;
+            const targetLang = activeTab === 'id' ? 'en' : 'id';
+
+            const sourceTexts: Record<string, string> = {};
+            if (sourceLang === 'id') {
+                if (formData.role_id) sourceTexts.role = formData.role_id;
+                if (formData.comment_id) sourceTexts.comment = formData.comment_id;
+            } else {
+                if (formData.role_en) sourceTexts.role = formData.role_en;
+                if (formData.comment_en) sourceTexts.comment = formData.comment_en;
+            }
+
+            if (Object.keys(sourceTexts).length === 0) {
+                alert(lang === 'id' ? 'Tidak ada teks untuk diterjemahkan' : 'No text to translate');
+                return;
+            }
+
+            const translated = await translateMultiple(sourceTexts, sourceLang, targetLang);
+
+            if (targetLang === 'en') {
+                if (translated.role) setFormData(prev => ({ ...prev, role_en: translated.role }));
+                if (translated.comment) setFormData(prev => ({ ...prev, comment_en: translated.comment }));
+            } else {
+                if (translated.role) setFormData(prev => ({ ...prev, role_id: translated.role }));
+                if (translated.comment) setFormData(prev => ({ ...prev, comment_id: translated.comment }));
+            }
+
+            alert(lang === 'id' ? 'Terjemahan berhasil!' : 'Translation complete!');
+        } catch (error) {
+            console.error('Translation error:', error);
+            alert(lang === 'id' ? 'Terjemahan gagal. Coba lagi nanti.' : 'Translation failed. Try again later.');
+        } finally {
+            setIsTranslating(false);
+        }
+    };
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!formData.name || !formData.comment_id || !formData.comment_en) {
@@ -87,20 +134,13 @@ const AdminTestimonialForm = () => {
             </header>
             <form onSubmit={handleSubmit} className="testimonial-form">
                 <div className="form-section">
+                    {/* Name field */}
                     <div className="form-group">
                         <label>{t.testimonials.name[lang]} *</label>
                         <input type="text" value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} required />
                     </div>
-                    <div className="form-row">
-                        <div className="form-group">
-                            <label>{t.testimonials.role[lang]} (ID)</label>
-                            <input type="text" value={formData.role_id} onChange={(e) => setFormData({ ...formData, role_id: e.target.value })} placeholder="Ibu Rumah Tangga" />
-                        </div>
-                        <div className="form-group">
-                            <label>{t.testimonials.role[lang]} (EN)</label>
-                            <input type="text" value={formData.role_en} onChange={(e) => setFormData({ ...formData, role_en: e.target.value })} placeholder="Housewife" />
-                        </div>
-                    </div>
+
+                    {/* Rating */}
                     <div className="form-group">
                         <label>{t.testimonials.rating[lang]}</label>
                         <div className="rating-input">
@@ -109,16 +149,61 @@ const AdminTestimonialForm = () => {
                             ))}
                         </div>
                     </div>
-                    <div className="form-group">
-                        <label>{t.testimonials.comment[lang]} (ID) *</label>
-                        <textarea value={formData.comment_id} onChange={(e) => setFormData({ ...formData, comment_id: e.target.value })} rows={4} required />
+
+                    {/* Lang Tabs Header with Translate Button */}
+                    <div className="lang-tabs-header" style={{ marginTop: '1.5rem' }}>
+                        <div className="lang-tabs">
+                            <div
+                                className={`tab-item ${activeTab === 'id' ? 'active' : ''}`}
+                                onClick={() => setActiveTab('id')}
+                            >
+                                🇮🇩 Bahasa Indonesia
+                            </div>
+                            <div
+                                className={`tab-item ${activeTab === 'en' ? 'active' : ''}`}
+                                onClick={() => setActiveTab('en')}
+                            >
+                                🇬🇧 English
+                            </div>
+                        </div>
+                        <button type="button" className="translate-btn" onClick={handleAutoTranslate} disabled={isTranslating}>
+                            <TranslateIcon />
+                            {isTranslating
+                                ? (lang === 'id' ? 'Menerjemahkan...' : 'Translating...')
+                                : (activeTab === 'id' ? 'Translate → EN' : 'Translate → ID')}
+                        </button>
                     </div>
-                    <div className="form-group">
-                        <label>{t.testimonials.comment[lang]} (EN) *</label>
-                        <textarea value={formData.comment_en} onChange={(e) => setFormData({ ...formData, comment_en: e.target.value })} rows={4} required />
+
+                    {/* Indonesian Fields */}
+                    <div className={`lang-fields ${activeTab === 'id' ? 'active' : ''}`}>
+                        <div className="form-group">
+                            <label>{t.testimonials.role[lang]}</label>
+                            <input type="text" value={formData.role_id} onChange={(e) => setFormData({ ...formData, role_id: e.target.value })} placeholder="Ibu Rumah Tangga" />
+                        </div>
+                        <div className="form-group">
+                            <label>{t.testimonials.comment[lang]} *</label>
+                            <textarea value={formData.comment_id} onChange={(e) => setFormData({ ...formData, comment_id: e.target.value })} rows={4} required />
+                        </div>
                     </div>
-                    <div className="form-group checkbox-group">
-                        <label><input type="checkbox" checked={formData.is_active} onChange={(e) => setFormData({ ...formData, is_active: e.target.checked })} /> {t.common.active[lang]}</label>
+
+                    {/* English Fields */}
+                    <div className={`lang-fields ${activeTab === 'en' ? 'active' : ''}`}>
+                        <div className="form-group">
+                            <label>{t.testimonials.role[lang]}</label>
+                            <input type="text" value={formData.role_en} onChange={(e) => setFormData({ ...formData, role_en: e.target.value })} placeholder="Housewife" />
+                        </div>
+                        <div className="form-group">
+                            <label>{t.testimonials.comment[lang]} *</label>
+                            <textarea value={formData.comment_en} onChange={(e) => setFormData({ ...formData, comment_en: e.target.value })} rows={4} required />
+                        </div>
+                    </div>
+
+                    {/* Active checkbox */}
+                    <div className="form-group checkbox-group" style={{ marginTop: '1rem' }}>
+                        <label>
+                            <input type="checkbox" checked={formData.is_active} onChange={(e) => setFormData({ ...formData, is_active: e.target.checked })} />
+                            {t.common.active[lang]}
+                        </label>
                     </div>
                 </div>
                 <div className="form-actions">

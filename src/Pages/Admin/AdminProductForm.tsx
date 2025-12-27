@@ -2,6 +2,8 @@ import { useState, useEffect, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useAdminLanguage, adminTranslations as t } from '../../Components/Admin/AdminLanguageContext';
 import { createProduct, updateProduct, fetchProductById } from '../../utils/supabaseClient';
+import { translateMultiple } from '../../utils/translateService';
+import { parseMarkdown } from '../../utils/simpleMarkdown';
 import './AdminProductForm.css';
 
 // Icons for markdown toolbar
@@ -10,6 +12,8 @@ const ItalicIcon = () => <svg width="16" height="16" viewBox="0 0 24 24" fill="c
 const ListIcon = () => <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M4 10.5c-.83 0-1.5.67-1.5 1.5s.67 1.5 1.5 1.5 1.5-.67 1.5-1.5-.67-1.5-1.5-1.5zm0-6c-.83 0-1.5.67-1.5 1.5S3.17 7.5 4 7.5 5.5 6.83 5.5 6 4.83 4.5 4 4.5zm0 12c-.83 0-1.5.68-1.5 1.5s.68 1.5 1.5 1.5 1.5-.68 1.5-1.5-.67-1.5-1.5-1.5zM7 19h14v-2H7v2zm0-6h14v-2H7v2zm0-8v2h14V5H7z" /></svg>;
 const HeadingIcon = () => <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M5 4v3h5.5v12h3V7H19V4z" /></svg>;
 const LinkIcon = () => <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z" /></svg>;
+const TableIcon = () => <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 3H5a2 2 0 0 0-2 2v4m6-6h10a2 2 0 0 1 2 2v4M9 3v18m0 0h10a2 2 0 0 0 2-2V9M9 21H5a2 2 0 0 1-2-2V9m0 0h18"></path></svg>;
+const TranslateIcon = () => <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12.87 15.07l-2.54-2.51.03-.03A17.52 17.52 0 0 0 14.07 6H17V4h-7V2H8v2H1v1.99h11.17C11.5 7.92 10.44 9.75 9 11.35 8.07 10.32 7.3 9.19 6.69 8h-2c.73 1.63 1.73 3.17 2.98 4.56l-5.09 5.02L4 19l5-5 3.11 3.11.76-2.04zM18.5 10h-2L12 22h2l1.12-3h4.75L21 22h2l-4.5-12zm-2.62 7l1.62-4.33L19.12 17h-3.24z" /></svg>;
 
 const MAX_IMAGES = 5;
 
@@ -23,7 +27,38 @@ const AdminProductForm = () => {
 
     const [isLoading, setIsLoading] = useState(false);
     const [isSaving, setIsSaving] = useState(false);
-    const [activeTab, setActiveTab] = useState<'id' | 'en'>('id');
+    const [isTranslating, setIsTranslating] = useState(false);
+    const [inputLang, setInputLang] = useState<'id' | 'en'>('id');
+
+    // Language Switcher Logic
+    const tabsRef = useRef<HTMLDivElement>(null);
+    const [sliderStyle, setSliderStyle] = useState<React.CSSProperties>({});
+
+    useEffect(() => {
+        const updateSlider = () => {
+            if (tabsRef.current) {
+                const activeBtn = tabsRef.current.querySelector('.tab-item.active') as HTMLElement;
+                if (activeBtn) {
+                    setSliderStyle({
+                        width: `${activeBtn.offsetWidth}px`,
+                        transform: `translateX(${activeBtn.offsetLeft - 4}px)`
+                    });
+                }
+            }
+        };
+
+        // Run initially and on change
+        updateSlider();
+
+        // Small delay to ensure layout
+        const timer = setTimeout(updateSlider, 50);
+
+        window.addEventListener('resize', updateSlider);
+        return () => {
+            window.removeEventListener('resize', updateSlider);
+            clearTimeout(timer);
+        };
+    }, [inputLang]);
 
     // Images array - first image is the main image
     const [images, setImages] = useState<string[]>([]);
@@ -179,13 +214,12 @@ const AdminProductForm = () => {
     };
 
     // Markdown toolbar actions
-    const insertMarkdown = (prefix: string, suffix: string = '', placeholder: string = '') => {
-        const textarea = activeTab === 'id' ? textareaIdRef.current : textareaEnRef.current;
+    const insertMarkdown = (targetRef: React.RefObject<HTMLTextAreaElement | null>, field: 'description_id' | 'description_en', prefix: string, suffix: string = '', placeholder: string = '') => {
+        const textarea = targetRef.current;
         if (!textarea) return;
 
         const start = textarea.selectionStart;
         const end = textarea.selectionEnd;
-        const field = activeTab === 'id' ? 'description_id' : 'description_en';
         const currentValue = formData[field];
         const selectedText = currentValue.substring(start, end) || placeholder;
 
@@ -204,11 +238,51 @@ const AdminProductForm = () => {
         }, 0);
     };
 
-    const handleBold = () => insertMarkdown('**', '**', 'teks tebal');
-    const handleItalic = () => insertMarkdown('*', '*', 'teks miring');
-    const handleList = () => insertMarkdown('\n• ', '', 'item');
-    const handleHeading = () => insertMarkdown('\n## ', '\n', 'Judul');
-    const handleLink = () => insertMarkdown('[', '](url)', 'teks link');
+    // Auto translate handler
+    const handleAutoTranslate = async () => {
+        setIsTranslating(true);
+        try {
+            const sourceLang = inputLang;
+            const targetLang = inputLang === 'id' ? 'en' : 'id';
+
+            // Build source texts based on input language
+            const sourceTexts: Record<string, string> = {};
+            if (sourceLang === 'id') {
+                if (formData.title_id) sourceTexts.title = formData.title_id;
+                if (formData.category_id) sourceTexts.category = formData.category_id;
+                if (formData.description_id) sourceTexts.description = formData.description_id;
+            } else {
+                if (formData.title_en) sourceTexts.title = formData.title_en;
+                if (formData.category_en) sourceTexts.category = formData.category_en;
+                if (formData.description_en) sourceTexts.description = formData.description_en;
+            }
+
+            if (Object.keys(sourceTexts).length === 0) {
+                alert(lang === 'id' ? 'Tidak ada teks untuk diterjemahkan' : 'No text to translate');
+                return;
+            }
+
+            const translated = await translateMultiple(sourceTexts, sourceLang, targetLang);
+
+            // Apply translations
+            if (targetLang === 'en') {
+                if (translated.title) handleChange('title_en', translated.title);
+                if (translated.category) handleChange('category_en', translated.category);
+                if (translated.description) handleChange('description_en', translated.description);
+            } else {
+                if (translated.title) handleChange('title_id', translated.title);
+                if (translated.category) handleChange('category_id', translated.category);
+                if (translated.description) handleChange('description_id', translated.description);
+            }
+
+            alert(lang === 'id' ? 'Terjemahan berhasil!' : 'Translation complete!');
+        } catch (error) {
+            console.error('Translation error:', error);
+            alert(lang === 'id' ? 'Terjemahan gagal. Coba lagi nanti.' : 'Translation failed. Try again later.');
+        } finally {
+            setIsTranslating(false);
+        }
+    };
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -325,99 +399,153 @@ const AdminProductForm = () => {
                 <div className="form-section">
                     <h2>{lang === 'id' ? 'Informasi Dasar' : 'Basic Information'}</h2>
 
-                    {/* Language Tabs */}
-                    <div className="lang-tabs">
-                        <div
-                            className={`tab-item ${activeTab === 'id' ? 'active' : ''}`}
-                            onClick={() => setActiveTab('id')}
-                        >
-                            🇮🇩 Bahasa Indonesia
+                    {/* Lang Tabs Header with Translate Button */}
+                    <div className="lang-tabs-header">
+                        <div className="lang-tabs" ref={tabsRef}>
+                            <div className="slider" style={sliderStyle}></div>
+                            <button
+                                type="button"
+                                className={`tab-item ${inputLang === 'id' ? 'active' : ''}`}
+                                onClick={() => setInputLang('id')}
+                            >
+                                <span className="t-short">ID</span>
+                                <span className="t-full">ID INDONESIA</span>
+                            </button>
+                            <button
+                                type="button"
+                                className={`tab-item ${inputLang === 'en' ? 'active' : ''}`}
+                                onClick={() => setInputLang('en')}
+                            >
+                                <span className="t-short">EN</span>
+                                <span className="t-full">EN ENGLISH</span>
+                            </button>
                         </div>
-                        <div
-                            className={`tab-item ${activeTab === 'en' ? 'active' : ''}`}
-                            onClick={() => setActiveTab('en')}
+                        <button
+                            type="button"
+                            className="translate-btn"
+                            onClick={handleAutoTranslate}
+                            disabled={isTranslating}
                         >
-                            🇬🇧 English
-                        </div>
+                            <TranslateIcon />
+                            <span className="btn-text">
+                                {isTranslating
+                                    ? (lang === 'id' ? 'Menerjemahkan...' : 'Translating...')
+                                    : (inputLang === 'id' ? 'Translate → EN' : 'Translate → ID')}
+                            </span>
+                        </button>
                     </div>
 
-                    {/* ID Fields */}
-                    <div className={`lang-fields ${activeTab === 'id' ? 'active' : ''}`}>
+                    {/* Indonesian Fields */}
+                    <div className={`lang-fields ${inputLang === 'id' ? 'active' : ''}`}>
                         <div className="form-group">
-                            <label>{t.products.productName[lang]} (ID) *</label>
+                            <label>{t.products.productName[lang]} *</label>
                             <input
                                 type="text"
                                 value={formData.title_id}
                                 onChange={(e) => handleChange('title_id', e.target.value)}
+                                placeholder="Nama produk dalam Bahasa Indonesia"
                                 required
                             />
                         </div>
                         <div className="form-group">
-                            <label>{t.products.category[lang]} (ID) *</label>
+                            <label>{t.products.category[lang]} *</label>
                             <input
                                 type="text"
                                 value={formData.category_id}
                                 onChange={(e) => handleChange('category_id', e.target.value)}
+                                placeholder="Kategori dalam Bahasa Indonesia"
                                 required
                             />
                         </div>
                         <div className="form-group">
-                            <label>{t.products.description[lang]} (ID) *</label>
-                            <div className="markdown-toolbar">
-                                <button type="button" onClick={handleBold} title="Bold"><BoldIcon /></button>
-                                <button type="button" onClick={handleItalic} title="Italic"><ItalicIcon /></button>
-                                <button type="button" onClick={handleHeading} title="Heading"><HeadingIcon /></button>
-                                <button type="button" onClick={handleList} title="List"><ListIcon /></button>
-                                <button type="button" onClick={handleLink} title="Link"><LinkIcon /></button>
+                            <label>{t.products.description[lang]} *</label>
+
+                            <div className="markdown-editor-container">
+                                {/* Editor Side */}
+                                <div className="markdown-input-area">
+                                    <div className="markdown-toolbar">
+                                        <button type="button" onClick={() => insertMarkdown(textareaIdRef, 'description_id', '**', '**', 'teks tebal')} title="Bold"><BoldIcon /></button>
+                                        <button type="button" onClick={() => insertMarkdown(textareaIdRef, 'description_id', '*', '*', 'teks miring')} title="Italic"><ItalicIcon /></button>
+                                        <button type="button" onClick={() => insertMarkdown(textareaIdRef, 'description_id', '\n## ', '\n', 'Judul')} title="Heading"><HeadingIcon /></button>
+                                        <button type="button" onClick={() => insertMarkdown(textareaIdRef, 'description_id', '\n• ', '', 'item')} title="List"><ListIcon /></button>
+                                        <button type="button" onClick={() => insertMarkdown(textareaIdRef, 'description_id', '[', '](url)', 'teks link')} title="Link"><LinkIcon /></button>
+                                    </div>
+                                    <textarea
+                                        ref={textareaIdRef}
+                                        value={formData.description_id}
+                                        onChange={(e) => handleChange('description_id', e.target.value)}
+                                        rows={12}
+                                        placeholder="Deskripsi dalam Bahasa Indonesia"
+                                        required
+                                    />
+                                </div>
+
+                                {/* Preview Side */}
+                                <div className="markdown-preview-area">
+                                    <span className="preview-label">Live Preview</span>
+                                    <div
+                                        className="markdown-preview"
+                                        dangerouslySetInnerHTML={{ __html: parseMarkdown(formData.description_id) }}
+                                    />
+                                </div>
                             </div>
-                            <textarea
-                                ref={textareaIdRef}
-                                value={formData.description_id}
-                                onChange={(e) => handleChange('description_id', e.target.value)}
-                                rows={8}
-                                placeholder="Gunakan markdown: **bold**, *italic*, • list, ## heading"
-                                required
-                            />
                         </div>
                     </div>
 
-                    {/* EN Fields */}
-                    <div className={`lang-fields ${activeTab === 'en' ? 'active' : ''}`}>
+                    {/* English Fields */}
+                    <div className={`lang-fields ${inputLang === 'en' ? 'active' : ''}`}>
                         <div className="form-group">
-                            <label>{t.products.productName[lang]} (EN) *</label>
+                            <label>{t.products.productName[lang]} *</label>
                             <input
                                 type="text"
                                 value={formData.title_en}
                                 onChange={(e) => handleChange('title_en', e.target.value)}
+                                placeholder="Product name in English"
                                 required
                             />
                         </div>
                         <div className="form-group">
-                            <label>{t.products.category[lang]} (EN) *</label>
+                            <label>{t.products.category[lang]} *</label>
                             <input
                                 type="text"
                                 value={formData.category_en}
                                 onChange={(e) => handleChange('category_en', e.target.value)}
+                                placeholder="Category in English"
                                 required
                             />
                         </div>
                         <div className="form-group">
-                            <label>{t.products.description[lang]} (EN) *</label>
-                            <div className="markdown-toolbar">
-                                <button type="button" onClick={handleBold} title="Bold"><BoldIcon /></button>
-                                <button type="button" onClick={handleItalic} title="Italic"><ItalicIcon /></button>
-                                <button type="button" onClick={handleHeading} title="Heading"><HeadingIcon /></button>
-                                <button type="button" onClick={handleList} title="List"><ListIcon /></button>
-                                <button type="button" onClick={handleLink} title="Link"><LinkIcon /></button>
+                            <label>{t.products.description[lang]} *</label>
+
+                            <div className="markdown-editor-container">
+                                {/* Editor Side */}
+                                <div className="markdown-input-area">
+                                    <div className="markdown-toolbar">
+                                        <button type="button" onClick={() => insertMarkdown(textareaEnRef, 'description_en', '**', '**', 'bold text')} title="Bold"><BoldIcon /></button>
+                                        <button type="button" onClick={() => insertMarkdown(textareaEnRef, 'description_en', '*', '*', 'italic text')} title="Italic"><ItalicIcon /></button>
+                                        <button type="button" onClick={() => insertMarkdown(textareaEnRef, 'description_en', '\n## ', '\n', 'Heading')} title="Heading"><HeadingIcon /></button>
+                                        <button type="button" onClick={() => insertMarkdown(textareaEnRef, 'description_en', '\n• ', '', 'item')} title="List"><ListIcon /></button>
+                                        <button type="button" onClick={() => insertMarkdown(textareaEnRef, 'description_en', '[', '](url)', 'link text')} title="Link"><LinkIcon /></button>
+                                    </div>
+                                    <textarea
+                                        ref={textareaEnRef}
+                                        value={formData.description_en}
+                                        onChange={(e) => handleChange('description_en', e.target.value)}
+                                        rows={12}
+                                        placeholder="Description in English"
+                                        required
+                                    />
+                                </div>
+
+                                {/* Preview Side */}
+                                <div className="markdown-preview-area">
+                                    <span className="preview-label">Live Preview</span>
+                                    <div
+                                        className="markdown-preview"
+                                        dangerouslySetInnerHTML={{ __html: parseMarkdown(formData.description_en) }}
+                                    />
+                                </div>
                             </div>
-                            <textarea
-                                ref={textareaEnRef}
-                                value={formData.description_en}
-                                onChange={(e) => handleChange('description_en', e.target.value)}
-                                rows={8}
-                                placeholder="Use markdown: **bold**, *italic*, • list, ## heading"
-                                required
-                            />
                         </div>
                     </div>
                 </div>

@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { getProductBySlug, type Product as StaticProduct } from '../data/productData';
-import { isUsingDatabaseProducts, fetchProductBySlug as fetchDbProduct, type PublicProduct } from '../utils/supabaseClient';
+import { isUsingDatabaseProducts, type PublicProduct } from '../utils/supabaseClient';
+import { fetchProductWithCache, getCachedProductDetail } from '../utils/productCache';
 import { parseMarkdown } from '../utils/markdownParser';
 import './styles/ProductDetailPage.css';
 import Accessories from '../Components/Accessories';
@@ -96,6 +97,11 @@ const formatRupiah = (angka: number): string => {
   return 'Rp' + rupiah;
 };
 
+// Type guard to check if product is PublicProduct
+const isPublicProduct = (p: PublicProduct | StaticProduct): p is PublicProduct => {
+  return 'title_id' in p && 'title_en' in p;
+};
+
 const ProductDetailPage: React.FC = () => {
   const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
@@ -130,7 +136,7 @@ const ProductDetailPage: React.FC = () => {
     };
   }, [currentLang]);
 
-  // Load product based on settings
+  // Load product with cache support
   useEffect(() => {
     const loadProduct = async () => {
       if (!slug) {
@@ -138,45 +144,42 @@ const ProductDetailPage: React.FC = () => {
         return;
       }
 
+      // Check cache first - if available, don't show loading
+      const cachedProduct = getCachedProductDetail(slug);
+      if (cachedProduct) {
+        console.log('[ProductDetail] Using cached data, no loading state');
+        const displayProduct = isPublicProduct(cachedProduct)
+          ? mapDbToDisplay(cachedProduct)
+          : mapStaticToDisplay(cachedProduct);
+        setProduct(displayProduct);
+        setMainImage(displayProduct.img);
+        setIsLoading(false);
+        return;
+      }
+
+      // Not cached - show loading and fetch
       setIsLoading(true);
       try {
         const useDatabase = await isUsingDatabaseProducts();
         console.log('[ProductDetail] useDatabase:', useDatabase, 'slug:', slug);
 
-        if (useDatabase) {
-          // Try to fetch from database
-          const dbProduct = await fetchDbProduct(slug);
-          console.log('[ProductDetail] dbProduct:', dbProduct);
+        // Fetch with cache support
+        const { product: fetchedProduct, fromCache } = await fetchProductWithCache(slug);
+        console.log('[ProductDetail] fetched:', fetchedProduct, 'fromCache:', fromCache);
 
-          if (dbProduct) {
-            const displayProduct = mapDbToDisplay(dbProduct);
-            setProduct(displayProduct);
-            setMainImage(displayProduct.img);
-          } else {
-            // Not found in DB, try static data
-            const staticProduct = getProductBySlug(slug);
-            if (staticProduct) {
-              const displayProduct = mapStaticToDisplay(staticProduct);
-              setProduct(displayProduct);
-              setMainImage(displayProduct.img);
-            } else {
-              navigate('/');
-            }
-          }
+        if (fetchedProduct) {
+          const displayProduct = isPublicProduct(fetchedProduct)
+            ? mapDbToDisplay(fetchedProduct)
+            : mapStaticToDisplay(fetchedProduct);
+          setProduct(displayProduct);
+          setMainImage(displayProduct.img);
         } else {
-          // Database mode disabled, use static data
-          const staticProduct = getProductBySlug(slug);
-          if (staticProduct) {
-            const displayProduct = mapStaticToDisplay(staticProduct);
-            setProduct(displayProduct);
-            setMainImage(displayProduct.img);
-          } else {
-            navigate('/');
-          }
+          // Not found anywhere
+          navigate('/');
         }
       } catch {
         console.error('[ProductDetail] Error loading product');
-        // Fallback to static on error
+        // Try static fallback on error
         const staticProduct = getProductBySlug(slug || '');
         if (staticProduct) {
           const displayProduct = mapStaticToDisplay(staticProduct);
@@ -219,8 +222,60 @@ const ProductDetailPage: React.FC = () => {
   if (isLoading) {
     return (
       <section className="product-detail-page">
-        <div className="page-container" style={{ justifyContent: 'center', alignItems: 'center', minHeight: '50vh' }}>
-          <p>{currentLang === 'id' ? 'Memuat produk...' : 'Loading product...'}</p>
+        <div className="page-container">
+          {/* LEFT: GALLERY SKELETON */}
+          <div className="product-gallery">
+            <div className="product-main-image skeleton-main-image">
+              <div className="skeleton-shimmer" />
+            </div>
+            <div className="thumb-list">
+              {[1, 2, 3].map((i) => (
+                <div key={i} className="thumb-item skeleton-thumb">
+                  <div className="skeleton-shimmer" />
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* MIDDLE: INFO SKELETON */}
+          <div className="product-info">
+            <div className="skeleton-product-title skeleton-shimmer" />
+            <div className="skeleton-product-price skeleton-shimmer" />
+            <div className="tabs">
+              <div className="skeleton-tab skeleton-shimmer" />
+            </div>
+            <div className="tab-content">
+              <div className="skeleton-line skeleton-shimmer" />
+              <div className="skeleton-line skeleton-shimmer" style={{ width: '60%' }} />
+              <div className="skeleton-line skeleton-shimmer" style={{ width: '80%' }} />
+              <div className="skeleton-paragraph">
+                <div className="skeleton-line skeleton-shimmer" />
+                <div className="skeleton-line skeleton-shimmer" />
+                <div className="skeleton-line skeleton-shimmer" style={{ width: '70%' }} />
+              </div>
+            </div>
+          </div>
+
+          {/* RIGHT: CHECKOUT CARD SKELETON */}
+          <aside className="checkout-card skeleton-checkout">
+            <div className="skeleton-checkout-title skeleton-shimmer" />
+            <div className="selected-variant skeleton-variant">
+              <div className="selected-variant-thumb">
+                <div className="skeleton-shimmer" />
+              </div>
+              <div className="skeleton-variant-name skeleton-shimmer" />
+            </div>
+            <div className="skeleton-subtotal skeleton-shimmer" />
+            <div className="skeleton-button skeleton-shimmer" />
+            <div className="card-footer-actions">
+              <div className="skeleton-share-title skeleton-shimmer" />
+              <div className="social-buttons">
+                {[1, 2, 3, 4].map((i) => (
+                  <div key={i} className="social-btn skeleton-social skeleton-shimmer" />
+                ))}
+              </div>
+            </div>
+          </aside>
         </div>
       </section>
     );

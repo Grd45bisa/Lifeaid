@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { isUsingDatabaseProducts, fetchPublicProducts, type PublicProduct } from '../utils/supabaseClient';
+import { isUsingDatabaseProducts, type PublicProduct } from '../utils/supabaseClient';
+import { fetchAccessoriesWithCache, getCachedProducts } from '../utils/productCache';
 import './styles/Accessories.css';
 
 // Language type
@@ -138,23 +139,58 @@ const Accessories: React.FC = () => {
     };
   }, [currentLang]);
 
-  // Load products based on settings
+  // Load products with cache support
   useEffect(() => {
     const loadProducts = async () => {
+      // Fetch Featured Product ID first
+      let excludedId: number | undefined;
+      try {
+        const { fetchFeaturedProduct } = await import('../utils/supabaseClient');
+        const featuredContent = await fetchFeaturedProduct();
+        excludedId = featuredContent?.linked_product_id;
+        console.log('[Accessories] Excluding Product ID:', excludedId);
+      } catch (err) {
+        console.warn('Failed to load featured product settings', err);
+      }
+
+      // Check cache first
+      const cachedProducts = getCachedProducts();
+      if (cachedProducts && cachedProducts.length > 0) {
+        console.log('[Accessories] Using cached data');
+        const accessories = cachedProducts.filter(p => {
+          // Filter by category AND exclude linked featured product
+          if (excludedId && p.id === excludedId) return false;
+
+          const categoryId = p.category_id.toLowerCase();
+          const categoryEn = p.category_en.toLowerCase();
+          return categoryId.includes('aksesori') ||
+            categoryEn.includes('accessories') ||
+            categoryId.includes('baterai') ||
+            categoryEn.includes('battery');
+        });
+
+        // If filtering results in empty, show all (except excluded)
+        let productsToShow = accessories.length > 0 ? accessories : cachedProducts;
+        if (excludedId) {
+          productsToShow = productsToShow.filter(p => p.id !== excludedId);
+        }
+
+        setItems(productsToShow.map(p => mapDatabaseProduct(p, currentLang)));
+        setIsLoading(false);
+        return;
+      }
+
+      // Not cached - show loading and fetch
       setIsLoading(true);
       try {
         const useDatabase = await isUsingDatabaseProducts();
-        console.log('[Accessories] useDatabase setting:', useDatabase);
-
         if (useDatabase) {
-          // Fetch from database
-          const dbProducts = await fetchPublicProducts();
-          console.log('[Accessories] dbProducts fetched:', dbProducts.length, dbProducts);
+          const { products: dbProducts } = await fetchAccessoriesWithCache();
 
           if (dbProducts.length > 0) {
-            // Filter for accessories category (exclude main Electric Patient Lifter)
-            // Accessories typically have category containing "Aksesori" or "Accessories"
             const accessories = dbProducts.filter(p => {
+              if (excludedId && p.id === excludedId) return false;
+
               const categoryId = p.category_id.toLowerCase();
               const categoryEn = p.category_en.toLowerCase();
               return categoryId.includes('aksesori') ||
@@ -162,32 +198,26 @@ const Accessories: React.FC = () => {
                 categoryId.includes('baterai') ||
                 categoryEn.includes('battery');
             });
-            console.log('[Accessories] filtered accessories:', accessories.length, accessories);
 
-            // If we have accessories, use them; otherwise use all products
-            const productsToShow = accessories.length > 0 ? accessories : dbProducts;
-            console.log('[Accessories] productsToShow:', productsToShow.length);
+            let productsToShow = accessories.length > 0 ? accessories : dbProducts;
+            if (excludedId) {
+              productsToShow = productsToShow.filter(p => p.id !== excludedId);
+            }
+
             setItems(productsToShow.map(p => mapDatabaseProduct(p, currentLang)));
           } else {
-            // No products in database, use fallback
-            console.log('[Accessories] No products in DB, using fallback');
             setItems(getDefaultItems(currentLang));
           }
         } else {
-          // Database mode disabled, use static data
-          console.log('[Accessories] Database mode disabled, using static data');
           setItems(getDefaultItems(currentLang));
         }
       } catch {
         console.error('[Accessories] Error loading accessories');
-        // Fallback to static data on error
         setItems(getDefaultItems(currentLang));
-
       } finally {
         setIsLoading(false);
       }
     };
-
 
     loadProducts();
   }, [currentLang]);
@@ -201,8 +231,18 @@ const Accessories: React.FC = () => {
       </div>
 
       {isLoading ? (
-        <div className="accessories-loading">
-          <p>{t.loading}</p>
+        <div className="accessories-grid">
+          {[1, 2, 3, 4].map((i) => (
+            <div key={i} className="accessories-card skeleton-card">
+              <div className="img-wrapper skeleton-wrapper">
+                <div className="skeleton-image" />
+              </div>
+              <div className="skeleton-content">
+                <div className="skeleton-title" />
+                <div className="skeleton-price" />
+              </div>
+            </div>
+          ))}
         </div>
       ) : (
         <div className="accessories-grid">

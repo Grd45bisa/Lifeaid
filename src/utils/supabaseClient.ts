@@ -527,6 +527,7 @@ export interface FeaturedProductContent {
     suitable_for_desc_id: string;
     suitable_for_desc_en: string;
     image_base64?: string;
+    linked_product_id?: number;
 }
 
 // Default featured product content
@@ -549,7 +550,8 @@ export const defaultFeaturedProduct: FeaturedProductContent = {
     suitable_for_title_en: 'Suitable For:',
     suitable_for_desc_id: 'Lansia, pengguna kursi roda, penyandang disabilitas, dan pasien yang terbaring di tempat tidur atau mengalami patah tulang.',
     suitable_for_desc_en: 'Elderly, wheelchair users, people with disabilities, and bedridden patients or those with broken bones.',
-    image_base64: ''
+    image_base64: '',
+    linked_product_id: undefined
 };
 
 // Fetch featured product content from settings
@@ -618,11 +620,12 @@ export const getCurrentUser = async (): Promise<AdminProfile | null> => {
     if (error || !user) return null;
 
     // Try to get profile from admin_profiles table
+    // Use maybeSingle() to avoid 406 error when profile doesn't exist
     const { data: profile } = await supabase
         .from('admin_profiles')
         .select('display_name, role')
         .eq('id', user.id)
-        .single();
+        .maybeSingle();
 
     return {
         id: user.id,
