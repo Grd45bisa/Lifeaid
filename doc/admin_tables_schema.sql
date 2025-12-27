@@ -107,9 +107,9 @@ CREATE TABLE IF NOT EXISTS admin_users (
     created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
--- Insert default admin user (password: lifeaid!@#$)
+-- Insert default admin user (password: [PASS-ADMIN])
 INSERT INTO admin_users (username, password, name, role) VALUES 
-    ('admin', 'lifeaid!@#$', 'Administrator', 'superadmin')
+    ('admin', '[PASS-ADMIN]', 'Administrator', 'superadmin')
 ON CONFLICT (username) DO NOTHING;
 
 -- ============================================
