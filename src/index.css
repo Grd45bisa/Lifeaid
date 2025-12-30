@@ -172,3 +172,82 @@ html {
     scrollbar-width: none;
   }
 }
+
+/* ===========================================
+   Mobile Performance Optimizations
+   =========================================== */
+
+@media (max-width: 768px) {
+
+  /* Disable heavy backdrop-filter on mobile for better GPU performance */
+  .navbar,
+  .image-badge,
+  .cta-modal-content,
+  .loading-overlay,
+  [class*="backdrop"] {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
+
+  /* GPU acceleration for smooth scrolling */
+  main {
+    transform: translateZ(0);
+    -webkit-transform: translateZ(0);
+  }
+
+  /* Content visibility for lazy rendering - improves initial paint */
+  main>section,
+  .about-section,
+  .why-choose-section,
+  .product-section,
+  .video-section,
+  .specifications-section,
+  .smartcare-section,
+  .features-usage-section,
+  .testimonials-section,
+  .faq-section,
+  .cta-section {
+    content-visibility: auto;
+    contain-intrinsic-size: 0 500px;
+  }
+
+  /* Reduce animation complexity on mobile */
+  .feature-card,
+  .stat-item,
+  .testimonial-card,
+  .product-card,
+  .faq-item {
+    transition: transform 0.2s ease, box-shadow 0.2s ease !important;
+  }
+
+  /* Disable infinite animations on mobile to save battery */
+  .pulse-animation,
+  [class*="pulse"] {
+    animation: none !important;
+  }
+
+  /* Optimize images for mobile */
+  img {
+    content-visibility: auto;
+  }
+
+  /* Reduce shadow complexity */
+  .card,
+  .modal {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
+  }
+}
+
+/* Extra optimization for very slow devices */
+@media (max-width: 480px) {
+
+  /* Further reduce animations */
+  * {
+    transition-duration: 0.15s !important;
+  }
+
+  /* Disable all decorative shadows */
+  .decorative-shadow {
+    box-shadow: none !important;
+  }
+}

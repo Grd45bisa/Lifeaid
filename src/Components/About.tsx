@@ -147,6 +147,8 @@ const About: React.FC = () => {
               : 'LifeAid patient lift aid'}
             className="about-image-main"
             loading="lazy"
+            width={600}
+            height={400}
           />
         </div>
 

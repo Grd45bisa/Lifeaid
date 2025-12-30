@@ -261,12 +261,10 @@ const Testimonials: React.FC = () => {
                   className="testimonial-card"
                   style={{ width: `${100 / itemsPerView}%` }}
                 >
-                  {/* Stars */}
-                  {renderStars(testimonial.rating || 5)}
-
                   {/* Comment */}
                   <p className="testimonial-comment">"{testimonial.comment}"</p>
-
+                  {/* Stars */}
+                  {renderStars(testimonial.rating || 5)}
                   {/* Author Info */}
                   <div className="testimonial-author">
                     <div className="author-avatar">
@@ -303,23 +301,6 @@ const Testimonials: React.FC = () => {
           </button>
         </div>
 
-        {/* Dots Indicator */}
-        <div className="carousel-dots">
-          {[...Array(maxIndex + 1)].map((_, index) => (
-            <button
-              key={index}
-              className={`carousel-dot ${index === currentIndex ? 'active' : ''}`}
-              onClick={() => {
-                if (!isTransitioning) {
-                  setIsTransitioning(true);
-                  setCurrentIndex(index);
-                  setTimeout(() => setIsTransitioning(false), 300);
-                }
-              }}
-              aria-label={`${t.goToSlide} ${index + 1}`}
-            />
-          ))}
-        </div>
       </div>
     </section>
   );

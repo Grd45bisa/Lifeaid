@@ -336,6 +336,11 @@
         height: 44px;
         font-size: 1rem;
     }
+
+    .chat-card {
+        box-shadow: none !important;
+        /* Override global mobile style */
+    }
 }
 
 @media (max-width: 480px) {

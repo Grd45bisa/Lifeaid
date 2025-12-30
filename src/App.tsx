@@ -26,6 +26,9 @@ const AdminSettings = lazy(() => import('./Pages/Admin/AdminSettings'));
 const AdminFeaturedProduct = lazy(() => import('./Pages/Admin/AdminFeaturedProduct'));
 const AdminProfile = lazy(() => import('./Pages/Admin/AdminProfile'));
 
+// Floating Chat
+const WhatsAppBubbleChat = lazy(() => import('./Components/WhatsAppBubbleChat'));
+
 // Loading component
 const LoadingFallback = () => (
   <div style={{
@@ -113,6 +116,7 @@ function App() {
             <Route path="/" element={<Home />} />
             <Route path="/product/:slug" element={<ProductDetailPage />} />
           </Routes>
+          <WhatsAppBubbleChat />
         </PublicLayout>
       )}
     </Suspense>

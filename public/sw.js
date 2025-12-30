@@ -1,4 +1,4 @@
-const CACHE_NAME = 'lifeaid-v1';
+const CACHE_NAME = 'lifeaid-v2';
 const STATIC_ASSETS = [
     '/',
     '/index.html',
@@ -11,7 +11,14 @@ const STATIC_ASSETS = [
 self.addEventListener('install', (event) => {
     event.waitUntil(
         caches.open(CACHE_NAME).then((cache) => {
-            return cache.addAll(STATIC_ASSETS);
+            // Use individual add with error handling
+            return Promise.allSettled(
+                STATIC_ASSETS.map((asset) =>
+                    cache.add(asset).catch((err) => {
+                        console.warn(`Failed to cache ${asset}:`, err);
+                    })
+                )
+            );
         })
     );
     // Activate immediately
@@ -24,7 +31,7 @@ self.addEventListener('activate', (event) => {
         caches.keys().then((cacheNames) => {
             return Promise.all(
                 cacheNames
-                    .filter((name) => name !== CACHE_NAME)
+                    .filter((name) => name.startsWith('lifeaid-') && name !== CACHE_NAME)
                     .map((name) => caches.delete(name))
             );
         })
@@ -33,30 +40,60 @@ self.addEventListener('activate', (event) => {
     self.clients.claim();
 });
 
-// Fetch event - network first, fallback to cache
+// Fetch event - stale-while-revalidate for better performance
 self.addEventListener('fetch', (event) => {
+    const request = event.request;
+
     // Skip non-GET requests
-    if (event.request.method !== 'GET') return;
+    if (request.method !== 'GET') return;
 
     // Skip API calls and external resources
-    const url = new URL(event.request.url);
+    const url = new URL(request.url);
     if (url.origin !== location.origin) return;
 
+    // Skip chrome-extension and other non-http protocols
+    if (!url.protocol.startsWith('http')) return;
+
+    // For navigation requests (HTML pages), use network-first
+    if (request.mode === 'navigate') {
+        event.respondWith(
+            fetch(request)
+                .then((response) => {
+                    // Only cache successful responses
+                    if (response.ok) {
+                        const responseClone = response.clone();
+                        caches.open(CACHE_NAME).then((cache) => {
+                            cache.put(request, responseClone).catch(() => { });
+                        });
+                    }
+                    return response;
+                })
+                .catch(() => caches.match('/') || caches.match('/index.html'))
+        );
+        return;
+    }
+
+    // For assets, use cache-first with network fallback
     event.respondWith(
-        fetch(event.request)
-            .then((response) => {
-                // Clone response for caching
-                const responseClone = response.clone();
-                caches.open(CACHE_NAME).then((cache) => {
-                    cache.put(event.request, responseClone);
-                });
-                return response;
-            })
-            .catch(() => {
-                // Fallback to cache
-                return caches.match(event.request).then((cachedResponse) => {
-                    return cachedResponse || caches.match('/');
-                });
-            })
+        caches.match(request).then((cachedResponse) => {
+            const fetchPromise = fetch(request)
+                .then((networkResponse) => {
+                    // Only cache successful, same-origin responses
+                    if (
+                        networkResponse.ok &&
+                        networkResponse.type === 'basic' &&
+                        !request.url.includes('/api/')
+                    ) {
+                        const responseClone = networkResponse.clone();
+                        caches.open(CACHE_NAME).then((cache) => {
+                            cache.put(request, responseClone).catch(() => { });
+                        });
+                    }
+                    return networkResponse;
+                })
+                .catch(() => cachedResponse);
+
+            return cachedResponse || fetchPromise;
+        })
     );
 });

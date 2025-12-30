@@ -13,7 +13,6 @@ const FeaturesUsage = React.lazy(() => import('../Components/Featuresusage'));
 const Testimonials = React.lazy(() => import('../Components/Testimonials'));
 const FAQ = React.lazy(() => import('../Components/Faq'));
 const CTASection = React.lazy(() => import('../Components/CTASection'));
-const WhatsAppBubbleChat = React.lazy(() => import('../Components/WhatsAppBubbleChat'));
 
 // Section loading component
 const SectionLoading = () => (
@@ -130,7 +129,6 @@ const Home: React.FC = () => {
           <Testimonials />
           <FAQ />
           <CTASection />
-          <WhatsAppBubbleChat />
         </React.Suspense>
       </main>
     </div>

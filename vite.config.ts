@@ -148,7 +148,15 @@ export default defineConfig({
       'X-XSS-Protection': '1; mode=block',
       'Referrer-Policy': 'strict-origin-when-cross-origin',
       'Permissions-Policy': 'camera=(), microphone=(), geolocation=()',
-      'Content-Security-Policy': "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://*.google.com https://*.gstatic.com https://*.googletagmanager.com https://*.google-analytics.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https: blob:; connect-src 'self' https://*.supabase.co https://api.emailjs.com wss://*.supabase.co https://translate.googleapis.com https://api.mymemory.translated.net; frame-src 'self' https://www.youtube.com; object-src 'none'",
+      'Content-Security-Policy': "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://*.google.com https://*.gstatic.com https://*.googletagmanager.com https://*.google-analytics.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https: blob:; connect-src 'self' https://*.supabase.co https://api.emailjs.com wss://*.supabase.co https://translate.googleapis.com https://api.mymemory.translated.net https://n8n.teratai.web.id; frame-src 'self' https://www.youtube.com; object-src 'none'",
+    },
+    proxy: {
+      '/n8n-webhook': {
+        target: 'https://n8n.teratai.web.id',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/n8n-webhook/, '/webhook'),
+        secure: false,
+      },
     },
   },
 

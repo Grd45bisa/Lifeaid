@@ -147,6 +147,8 @@ const Product: React.FC = () => {
                 : 'Electric Patient Lifter LifeAid'}
               className="product-image-main"
               loading="lazy"
+              width={600}
+              height={500}
             />
           </div>
 
