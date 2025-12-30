@@ -1,12 +1,17 @@
 {
     "rewrites": [
         {
+<<<<<<< HEAD
             "source": "/n8n-webhook/:match*",
             "destination": "https://n8n.teratai.web.id/webhook/:match*"
         },
         {
             "source": "/(.*)",
             "destination": "/index.html"
+=======
+            "source": "/((?!assets|.*\\..*).*)",
+            "destination": "/"
+>>>>>>> 1ffcc3a1cd7828a0d456b5cf6b2a09ca970e1226
         }
     ],
     "headers": [

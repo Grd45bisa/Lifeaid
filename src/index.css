@@ -178,7 +178,10 @@ html {
    =========================================== */
 
 @media (max-width: 768px) {
+<<<<<<< HEAD
 
+=======
+>>>>>>> 1ffcc3a1cd7828a0d456b5cf6b2a09ca970e1226
   /* Disable heavy backdrop-filter on mobile for better GPU performance */
   .navbar,
   .image-badge,
@@ -196,7 +199,11 @@ html {
   }
 
   /* Content visibility for lazy rendering - improves initial paint */
+<<<<<<< HEAD
   main>section,
+=======
+  main > section,
+>>>>>>> 1ffcc3a1cd7828a0d456b5cf6b2a09ca970e1226
   .about-section,
   .why-choose-section,
   .product-section,
@@ -233,14 +240,22 @@ html {
 
   /* Reduce shadow complexity */
   .card,
+<<<<<<< HEAD
   .modal {
+=======
+  .modal,
+  [class*="card"] {
+>>>>>>> 1ffcc3a1cd7828a0d456b5cf6b2a09ca970e1226
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
   }
 }
 
 /* Extra optimization for very slow devices */
 @media (max-width: 480px) {
+<<<<<<< HEAD
 
+=======
+>>>>>>> 1ffcc3a1cd7828a0d456b5cf6b2a09ca970e1226
   /* Further reduce animations */
   * {
     transition-duration: 0.15s !important;
