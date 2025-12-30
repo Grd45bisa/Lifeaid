@@ -1,4 +1,4 @@
-const CACHE_NAME = 'lifeaid-v2';
+const CACHE_NAME = 'lifeaid-v3';
 const STATIC_ASSETS = [
     '/',
     '/index.html',
@@ -40,7 +40,7 @@ self.addEventListener('activate', (event) => {
     self.clients.claim();
 });
 
-// Fetch event - stale-while-revalidate for better performance
+// Fetch event - network-first for CSS/JS, stale-while-revalidate for others
 self.addEventListener('fetch', (event) => {
     const request = event.request;
 
@@ -73,7 +73,25 @@ self.addEventListener('fetch', (event) => {
         return;
     }
 
-    // For assets, use cache-first with network fallback
+    // For CSS and JS files, use network-first (always get fresh)
+    if (url.pathname.endsWith('.css') || url.pathname.endsWith('.js')) {
+        event.respondWith(
+            fetch(request)
+                .then((response) => {
+                    if (response.ok && response.type === 'basic') {
+                        const responseClone = response.clone();
+                        caches.open(CACHE_NAME).then((cache) => {
+                            cache.put(request, responseClone).catch(() => { });
+                        });
+                    }
+                    return response;
+                })
+                .catch(() => caches.match(request))
+        );
+        return;
+    }
+
+    // For other assets (images, fonts), use cache-first with network fallback
     event.respondWith(
         caches.match(request).then((cachedResponse) => {
             const fetchPromise = fetch(request)
@@ -97,3 +115,4 @@ self.addEventListener('fetch', (event) => {
         })
     );
 });
+

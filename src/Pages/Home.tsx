@@ -2,6 +2,12 @@ import React from 'react';
 import { Helmet } from 'react-helmet-async';
 import Hero from '../Components/Hero';
 
+
+
+// Public components
+import Navbar from '../Components/Navbar';
+import Footer from '../Components/Footer';
+
 // Lazy load components
 const About = React.lazy(() => import('../Components/About'));
 const WhyChooseUs = React.lazy(() => import('../Components/WhyChooseUs'));
@@ -116,6 +122,7 @@ const Home: React.FC = () => {
         <meta property="og:url" content="https://lifeaidstore.com/" />
         <meta property="og:type" content="website" />
       </Helmet>
+      <Navbar />
       <main>
         <Hero />
         <React.Suspense fallback={<SectionLoading />}>
@@ -131,6 +138,7 @@ const Home: React.FC = () => {
           <CTASection />
         </React.Suspense>
       </main>
+      <Footer />
     </div>
   );
 };

@@ -2,9 +2,7 @@ import { Suspense, lazy } from 'react';
 import { Routes, Route, useLocation } from 'react-router-dom';
 import './index.css';
 
-// Public components
-import Navbar from './Components/Navbar';
-import Footer from './Components/Footer';
+
 
 // Lazy load public pages
 const Home = lazy(() => import('./Pages/Home'));
@@ -67,9 +65,7 @@ const LoadingFallback = () => (
 // Layout wrapper for public pages
 const PublicLayout = ({ children }: { children: React.ReactNode }) => (
   <>
-    <Navbar />
     {children}
-    <Footer />
   </>
 );
 

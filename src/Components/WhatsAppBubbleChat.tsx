@@ -178,8 +178,8 @@ const WhatsAppBubbleChat: React.FC = () => {
   // ============================================================================
   const CONFIG = {
     phoneNumber: '6281219751605',
-    // Gunakan proxy path untuk menghindari CORS
-    n8nWebhook: '/n8n-webhook/387dbe3f-1bc1-4346-90c8-1235f20d2fae/chat',
+    // Bypass proxy, use direct URL
+    n8nWebhook: 'https://n8n.teratai.web.id/webhook/387dbe3f-1bc1-4346-90c8-1235f20d2fae/chat',
     emailjs: {
       serviceId: 'service_ovo0bkw',
       templateId: 'template_du5kp9t',
